@@ -1,0 +1,195 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:QuanLyXe03.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vlc="clr-namespace:LibVLCSharp.Avalonia;assembly=LibVLCSharp.Avalonia"
+        mc:Ignorable="d"
+        x:Class="QuanLyXe03.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="QuanLyXe"
+        Width="1200" Height="800"
+        MinWidth="900" MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        Background="#f8f9fa">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+
+    <DockPanel>
+        
+        <!-- ✅ Menu Bar -->
+        <Menu DockPanel.Dock="Top" Background="#2C3E50" Foreground="White">
+            
+            <!-- Menu Hệ thống -->
+            <MenuItem Header="Hệ thống" Foreground="White">
+                <MenuItem Header="Cài đặt"/>
+                <MenuItem Header="Sao lưu dữ liệu"/>
+                <Separator/>
+                <MenuItem Header="Thoát" Click="Exit_Click"/>
+            </MenuItem>
+            
+            <!-- Menu Dữ liệu -->
+            <MenuItem Header="Dữ liệu" Foreground="White">
+                <MenuItem Header="Danh sách thẻ" Click="OpenCardManagement_Click"/>
+                
+                <MenuItem Header="Lịch sử xe ra vào" Click="OpenCardEventManagement_Click"/>
+                <MenuItem Header="Danh sách khách hàng"/>
+            </MenuItem>
+            
+        </Menu>
+
+
+
+    <!-- Grid chính -->
+    <Grid RowDefinitions="6*,4*" Background="#ECEFF1">  <!-- Điều chỉnh tỷ lệ rows -->
+
+        <!-- Hàng trên: Camera VÀO & RA -->
+        <Grid Grid.Row="0" ColumnDefinitions="1*,1*" Margin="6">
+            <!-- Camera Vào -->
+<Border Grid.Column="0" Background="#F0F0F0" Margin="5" CornerRadius="8"
+        BorderBrush="#2C3E50" BorderThickness="2">
+    <Grid RowDefinitions="Auto,*">
+        <Border Background="#2C3E50" Height="36" CornerRadius="8,8,0,0">
+            <TextBlock Text="🚗  VÀO"
+                       Foreground="White" FontSize="18" FontWeight="Bold"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- ✅ XÓA MediaPlayer binding, chỉ để x:Name -->
+        <vlc:VideoView Grid.Row="1"
+                       x:Name="CameraInView"
+                       HorizontalAlignment="Stretch"
+                       VerticalAlignment="Stretch"/>
+    </Grid>
+</Border>
+
+<!-- Camera Ra -->
+<Border Grid.Column="1" Background="#F0F0F0" Margin="5" CornerRadius="8"
+        BorderBrush="#2C3E50" BorderThickness="2">
+    <Grid RowDefinitions="Auto,*">
+        <Border Background="#2C3E50" Height="36" CornerRadius="8,8,0,0">
+            <TextBlock Text="🚙  RA"
+                       Foreground="White" FontSize="18" FontWeight="Bold"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- ✅ XÓA MediaPlayer binding, chỉ để x:Name -->
+        <vlc:VideoView Grid.Row="1"
+                       x:Name="CameraOutView"
+                       HorizontalAlignment="Stretch"
+                       VerticalAlignment="Stretch"/>
+    </Grid>
+</Border>
+        </Grid>
+
+        <!-- Hàng giữa: thông tin + snapshot + các nút -->
+<Grid Grid.Row="1" ColumnDefinitions="1.5*,3*,1*" Margin="8">
+
+    <!-- Thông tin xe -->
+    <Border Grid.Column="0" Background="White" Margin="5" Padding="8"
+            CornerRadius="8" BorderBrush="#BDC3C7" BorderThickness="1">
+        <StackPanel>
+            <TextBlock Text="Thông tin xe" FontSize="14" FontWeight="Bold"
+                       Margin="0,0,0,8" HorizontalAlignment="Center"
+                       Foreground="Black"/>
+            
+            <!--  BIND Biển số -->
+            <TextBlock Text="{Binding PlateNumber, StringFormat='Biển số: {0}'}" 
+                       FontSize="12" Foreground="Black" Margin="0,0,0,4"/>
+            
+            <!--  BIND Thời gian -->
+            <TextBlock Text="{Binding VehicleDateTime, StringFormat='Thời gian: {0}'}" 
+                       FontSize="12" Foreground="Black" Margin="0,0,0,6"/>
+
+            <!--  Hiển thị StatusMessage -->
+        <TextBlock Text="{Binding StatusMessage}" 
+                   FontSize="13" 
+                   FontWeight="Bold"
+                   Foreground="Green" 
+                   Margin="0,8,0,4"
+                   TextWrapping="Wrap"
+                   HorizontalAlignment="Center"/>
+
+
+
+        </StackPanel>
+    </Border>
+
+    <!-- Ảnh snapshot + nút -->
+    <Grid Grid.Column="1" Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!--  3 Ảnh snapshot với binding -->
+        <Grid Grid.Row="0" ColumnDefinitions="1*,1*,1*" Margin="0">
+            <!-- Ảnh 1: Mới nhất -->
+            <Border Grid.Column="0" Background="White" BorderBrush="#BDC3C7"
+                    BorderThickness="1" CornerRadius="6" Margin="4" MinHeight="80">
+                <Image Source="{Binding Snapshot1}" Stretch="Uniform"/>
+            </Border>
+
+            <!-- Ảnh 2 -->
+            <Border Grid.Column="1" Background="White" BorderBrush="#BDC3C7"
+                    BorderThickness="1" CornerRadius="6" Margin="4" MinHeight="80">
+                <Image Source="{Binding Snapshot2}" Stretch="Uniform"/>
+            </Border>
+
+            <!-- Ảnh 3 -->
+            <Border Grid.Column="2" Background="White" BorderBrush="#BDC3C7"
+                    BorderThickness="1" CornerRadius="6" Margin="4" MinHeight="80">
+                <Image Source="{Binding Snapshot3}" Stretch="Uniform"/>
+            </Border>
+        </Grid>
+
+        <!-- Nút chức năng -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Margin="0,8,0,0" Spacing="12">
+            <Button Content="📸 Chụp lại"
+                    Command="{Binding CaptureSnapshotCommand}"
+                    Background="#7F8C8D" Foreground="White"
+                    MinWidth="100" MinHeight="40" Padding="8,4"
+                    FontSize="12"/>
+
+            <Button Content="✅ Ghi vào"
+                    Command="{Binding CheckInCommand}"
+                    Background="#27AE60" Foreground="White"
+                    MinWidth="100" MinHeight="40" Padding="8,4"
+                    FontSize="12"/>
+
+            <Button Content="⛔ Ghi ra"
+                    Command="{Binding CheckOutCommand}"
+                    Background="#C0392B" Foreground="White"
+                    MinWidth="100" MinHeight="40" Padding="8,4"
+                    FontSize="12"/>
+
+            <Button Content="🖨 In"
+                    Background="#7F8C8D" Foreground="White"
+                    MinWidth="100" MinHeight="40" Padding="8,4"
+                    FontSize="12"/>
+        </StackPanel>
+    </Grid>
+
+    <!-- Số tiền -->
+    <Border Grid.Column="2" Background="White" Margin="5" Padding="8"
+            CornerRadius="8" BorderBrush="#BDC3C7" BorderThickness="1">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="Số tiền" FontSize="14" FontWeight="Bold" 
+                       Margin="0,0,0,8" Foreground="Black"/>
+            
+            <!--  BIND Số tiền -->
+            <TextBlock Text="{Binding ParkingFee}" 
+                       FontSize="24" FontWeight="Bold" Foreground="#C0392B"/>
+        </StackPanel>
+    </Border>
+</Grid>
+
+       
+    </Grid>
+        </DockPanel>
+</Window>

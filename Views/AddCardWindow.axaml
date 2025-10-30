@@ -1,0 +1,146 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:QuanLyXe03.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="600"
+        x:Class="QuanLyXe03.Views.AddCardWindow"
+        x:DataType="vm:AddCardViewModel"
+        Title="➕ Thêm thẻ mới"
+        Width="500" Height="600"
+        MinHeight="550"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Background="Gray">
+
+    <Design.DataContext>
+        <vm:AddCardViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="20">
+        
+        <!-- Header -->
+        <TextBlock Grid.Row="0" 
+                   Text="➕ Thêm thẻ mới" 
+                   FontSize="20" 
+                   FontWeight="Bold"
+                   Foreground="#2C3E50"
+                   Margin="0,0,0,20"/>
+
+        <!-- Form Fields với ScrollViewer -->
+        <ScrollViewer Grid.Row="1" 
+                      VerticalScrollBarVisibility="Auto"
+                      Margin="0,0,0,15">
+            <StackPanel Spacing="15">
+                
+                <!-- CardNo -->
+                <StackPanel>
+                    <TextBlock Text="Số thẻ (CardNo): *" 
+                               FontSize="13" 
+                               Margin="0,0,0,5"
+                               Foreground="#333"/>
+                    <TextBox Text="{Binding CardNo}" 
+                             Watermark="Nhập số thẻ"
+                             Height="38"/>
+                </StackPanel>
+
+                <!-- CardNumber -->
+                <StackPanel>
+                    <TextBlock Text="Mã thẻ (CardNumber): *" 
+                               FontSize="13" 
+                               Margin="0,0,0,5"
+                               Foreground="#333"/>
+                    <TextBox Text="{Binding CardNumber}" 
+                             Watermark="Nhập mã thẻ"
+                             Height="38"/>
+                </StackPanel>
+
+                <!-- CardGroup -->
+                <StackPanel>
+                    <TextBlock Text="Nhóm thẻ: *" 
+                               FontSize="13" 
+                               Margin="0,0,0,5"
+                               Foreground="#333"/>
+                    <ComboBox ItemsSource="{Binding CardGroups}"
+                              SelectedItem="{Binding SelectedCardGroup}"
+                              Height="38"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding CardGroupName}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- DateRegister -->
+                <StackPanel>
+                    <TextBlock Text="Ngày đăng ký: *" 
+                               FontSize="13" 
+                               Margin="0,0,0,5"
+                               Foreground="#333"/>
+                    <DatePicker SelectedDate="{Binding DateRegister}" 
+                                Height="38"
+                                HorizontalAlignment="Stretch"/>
+                </StackPanel>
+
+                <!-- ExpireDate -->
+                <StackPanel>
+                    <TextBlock Text="Ngày hết hạn: *" 
+                               FontSize="13" 
+                               Margin="0,0,0,5"
+                               Foreground="#333"/>
+                    <DatePicker SelectedDate="{Binding ExpireDate}" 
+                                Height="38"
+                                HorizontalAlignment="Stretch"/>
+                </StackPanel>
+
+                <!-- Status -->
+                <StackPanel>
+                    <TextBlock Text="Trạng thái: *" 
+                               FontSize="13" 
+                               Margin="0,0,0,5"
+                               Foreground="#333"/>
+                    <ComboBox SelectedIndex="{Binding SelectedStatus}"
+                              Height="38"
+                              HorizontalAlignment="Stretch"
+                              MaxDropDownHeight="200">
+                        <ComboBoxItem Content="Chưa kích hoạt"/>
+                        <ComboBoxItem Content="Đang hoạt động"/>
+                        <ComboBoxItem Content="Hết hạn"/>
+                        <ComboBoxItem Content="Đã khóa"/>
+                    </ComboBox>
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Buttons -->
+        <Border Grid.Row="2"
+                Background="White"
+                BorderBrush="#e0e0e0"
+                BorderThickness="0,1,0,0"
+                Padding="0,15,0,0">
+            <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Center"
+                        Spacing="15">
+                
+                <Button Content="💾 Lưu" 
+                        Command="{Binding SaveCommand}"
+                        Background="#28a745" 
+                        Foreground="White"
+                        Width="120" 
+                        Height="40"
+                        FontSize="14"/>
+                
+                <Button Content="❌ Hủy" 
+                        Command="{Binding CancelCommand}"
+                        Background="#6c757d" 
+                        Foreground="White"
+                        Width="120" 
+                        Height="40"
+                        FontSize="14"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

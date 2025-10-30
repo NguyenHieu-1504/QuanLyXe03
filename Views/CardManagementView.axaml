@@ -1,0 +1,220 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:QuanLyXe03.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="800"
+             x:Class="QuanLyXe03.Views.CardManagementView"
+             x:DataType="vm:CardManagementViewModel"
+             Background="Gray">
+
+    <Design.DataContext>
+        <vm:CardManagementViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="15">
+        
+        <!-- Dòng 1: Filters -->
+        <Grid Grid.Row="0" ColumnDefinitions="2*,1*,1*,1.5*,1.5*" Margin="0,0,0,10">
+            
+            <!-- Từ khóa -->
+            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                <TextBlock Text="Từ khóa:" FontSize="13" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding SearchText}" 
+                         Watermark="Số thẻ, mã thẻ, mã khách hàng"
+                         Height="35"/>
+            </StackPanel>
+
+            <!-- Từ ngày -->
+            <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                <TextBlock Text="Từ ngày:" FontSize="13" Margin="0,0,0,5"/>
+                <DatePicker SelectedDate="{Binding FromDate}" Height="35"/>
+            </StackPanel>
+
+            <!-- Đến ngày -->
+            <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                <TextBlock Text="Đến ngày:" FontSize="13" Margin="0,0,0,5"/>
+                <DatePicker SelectedDate="{Binding ToDate}" Height="35"/>
+            </StackPanel>
+
+            <!-- Nhóm khách hàng -->
+            <StackPanel Grid.Column="3" Margin="0,0,10,0">
+                <TextBlock Text="Nhóm khách hàng:" FontSize="13" Margin="0,0,0,5"/>
+                <ComboBox Height="35" HorizontalAlignment="Stretch">
+                    <ComboBoxItem Content="--Chọn nhóm khách hàng--" IsSelected="True"/>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Trạng thái -->
+            <StackPanel Grid.Column="4">
+                <TextBlock Text="Trạng thái:" FontSize="13" Margin="0,0,0,5"/>
+                <ComboBox Height="35" HorizontalAlignment="Stretch">
+                    <ComboBoxItem Content="-- Lựa chọn trạng thái --" IsSelected="True"/>
+                    <ComboBoxItem Content="Chưa kích hoạt"/>
+                    <ComboBoxItem Content="Đang hoạt động"/>
+                    <ComboBoxItem Content="Hết hạn"/>
+                    <ComboBoxItem Content="Đã khóa"/>
+                </ComboBox>
+            </StackPanel>
+        </Grid>
+
+        <!-- Dòng 2: Radio buttons -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
+            <RadioButton Content="Không lọc theo ngày" 
+                         IsChecked="True" 
+                         GroupName="DateFilter"
+                         Margin="0,0,20,0"
+                         Command="{Binding $parent[UserControl].((vm:CardManagementViewModel)DataContext).ResetCommand}"/>
+            <RadioButton Content="Lọc theo ngày đăng ký" 
+                         GroupName="DateFilter"
+                         Margin="0,0,20,0"/>
+            <RadioButton Content="Lọc theo ngày hết hạn" 
+                         GroupName="DateFilter"
+                         Margin="0,0,20,0"/>
+            
+            <!-- Nhóm thẻ -->
+            <TextBlock Text="Nhóm thẻ:" VerticalAlignment="Center" Margin="20,0,10,0"/>
+            <ComboBox Width="150">
+                <ComboBoxItem Content="None selected" IsSelected="True"/>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- Dòng 3: Action buttons -->
+        <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
+            
+            <!-- Buttons bên trái -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                <Button Content="🔍 Tìm kiếm" 
+                        Command="{Binding SearchCommand}"
+                        Background="#007bff" 
+                        Foreground="White"
+                        Padding="15,8"
+                        FontSize="13"/>
+
+
+                <Button Content="➕ Thêm mới" 
+                Click="AddCard_Click"
+                Background="#28a745" 
+                Foreground="White"
+                Padding="15,8"
+                FontSize="13"/>
+
+                
+                <Button Content="📄 Xuất excel" 
+                        Command="{Binding ExportExcelCommand}"
+                        Background="#28a745" 
+                        Foreground="White"
+                        Padding="15,8"
+                        FontSize="13"/>
+                
+                <Button Content="📥 Nhập excel" 
+                        Command="{Binding ImportExcelCommand}"
+                        Background="#28a745" 
+                        Foreground="White"
+                        Padding="15,8"
+                        FontSize="13"/>
+                
+                <Button Content="🔄 Reset" 
+                        Command="{Binding ResetCommand}"
+                        Background="#6c757d" 
+                        Foreground="White"
+                        Padding="15,8"
+                        FontSize="13"/>
+            </StackPanel>
+
+            <!-- Thông tin số lượng -->
+            <TextBlock Grid.Column="1" 
+                       Text="{Binding TotalCount, StringFormat='Đã lựa chọn: 0 / {0}'}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       FontSize="13"
+                       Foreground="#666"/>
+
+            <!-- Buttons bên phải -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
+                <Button Content="🔒 Khóa thẻ" 
+                        Background="#ffc107" 
+                        Foreground="White"
+                        Padding="12,8"
+                        FontSize="13"/>
+                
+                <Button Content="🔓 Mở thẻ" 
+                        Background="#17a2b8" 
+                        Foreground="White"
+                        Padding="12,8"
+                        FontSize="13"/>
+                
+                <Button Content="🗑️ Xóa thẻ" 
+                        Background="#dc3545" 
+                        Foreground="White"
+                        Padding="12,8"
+                        FontSize="13"/>
+                
+                <Button Content="❌ Hủy thẻ" 
+                        Background="#6c757d" 
+                        Foreground="White"
+                        Padding="12,8"
+                        FontSize="13"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Dòng 4: DataGrid -->
+        <Border Grid.Row="3" BorderBrush="Red"
+                MinHeight="400"
+                Background="LightYellow"
+                BorderThickness="1">
+    <DataGrid ItemsSource="{Binding Cards}"
+              AutoGenerateColumns="False"
+              IsReadOnly="True"
+              GridLinesVisibility="All"
+              Background="LightBlue"
+              CanUserReorderColumns="False"
+              CanUserResizeColumns="True"
+              CanUserSortColumns="False"
+              SelectionMode="Extended"
+              MaxHeight="500"
+              Height="500">
+        
+        <DataGrid.Columns>
+            <DataGridCheckBoxColumn Width="40">
+                <DataGridCheckBoxColumn.Header>
+                    <CheckBox/>
+                </DataGridCheckBoxColumn.Header>
+            </DataGridCheckBoxColumn>
+            
+            <DataGridTextColumn Header="STT" Width="50"/>
+            <DataGridTextColumn Header="CardNo" Binding="{Binding CardNo}" Width="100"/>
+            <DataGridTextColumn Header="Mã thẻ" Binding="{Binding CardNumber}" Width="120"/>
+            <DataGridTextColumn Header="Nhóm thẻ" Binding="{Binding CardGroupName}" Width="120"/>
+            <DataGridTextColumn Header="Biển số" Binding="{Binding Plate1}" Width="100"/>
+            <DataGridTextColumn Header="Ngày hết hạn" 
+                                Binding="{Binding ExpireDate, StringFormat='{}{0:dd/MM/yyyy}'}" 
+                                Width="110"/>
+            <DataGridTextColumn Header="Mã KH" Binding="{Binding CustomerID}" Width="100"/>
+            <DataGridTextColumn Header="Khách hàng" Binding="{Binding CustomerName}" Width="150"/>
+            <DataGridTextColumn Header="Địa chỉ" Binding="{Binding Address}" Width="180"/>
+            <DataGridTextColumn Header="Căn hộ" Binding="{Binding ApartmentNumber}" Width="80"/>
+            <DataGridTextColumn Header="Nhóm KH" Binding="{Binding CustomerGroupName}" Width="130"/>
+            <DataGridTextColumn Header="Ngày đăng ký" 
+                                Binding="{Binding DateRegister, StringFormat='{}{0:dd/MM/yyyy}'}" 
+                                Width="120"/>
+            <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusText}" Width="120"/>
+            
+            <!-- Xử lý -->
+            <DataGridTemplateColumn Header="Xử lý" Width="180">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                            <Button Content="✏️" Width="30" Height="30" Padding="0" Background="#ffc107"/>
+                            <Button Content="👁️" Width="30" Height="30" Padding="0" Background="#17a2b8"/>
+                            <Button Content="🔒" Width="30" Height="30" Padding="0" Background="#6c757d"/>
+                            <Button Content="🗑️" Width="30" Height="30" Padding="0" Background="#dc3545"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+        </DataGrid.Columns>
+    </DataGrid>
+</Border>
+    </Grid>
+</UserControl>

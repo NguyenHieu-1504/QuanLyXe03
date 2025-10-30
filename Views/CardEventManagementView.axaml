@@ -1,0 +1,112 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:QuanLyXe03.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="800"
+             x:Class="QuanLyXe03.Views.CardEventManagementView"
+             x:DataType="vm:CardEventManagementViewModel"
+             Background="Gray">
+
+    <Design.DataContext>
+        <vm:CardEventManagementViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,Auto,*" Margin="15">
+        
+        <!-- Dòng 1: Filters -->
+        <Grid Grid.Row="0" ColumnDefinitions="2*,1*,1*,*" Margin="0,0,0,10">
+            
+            <!-- Từ khóa -->
+            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                <TextBlock Text="Từ khóa:" FontSize="13" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding SearchText}" 
+                         Watermark="Số thẻ, biển số, tên khách hàng..."
+                         Height="35"/>
+            </StackPanel>
+
+            <!-- Từ ngày -->
+            <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                <TextBlock Text="Từ ngày:" FontSize="13" Margin="0,0,0,5"/>
+                <DatePicker SelectedDate="{Binding FromDate}" Height="35"/>
+            </StackPanel>
+
+            <!-- Đến ngày -->
+            <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                <TextBlock Text="Đến ngày:" FontSize="13" Margin="0,0,0,5"/>
+                <DatePicker SelectedDate="{Binding ToDate}" Height="35"/>
+            </StackPanel>
+
+        </Grid>
+
+        <!-- Dòng 2: Action buttons -->
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*" Margin="0,0,0,10">
+            
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                <Button Content="🔍 Tìm kiếm" 
+                        Command="{Binding SearchCommand}"
+                        Background="#007bff" 
+                        Foreground="White"
+                        Padding="15,8"
+                        FontSize="13"/>
+                
+                <Button Content="📄 Xuất excel" 
+                        Command="{Binding ExportExcelCommand}"
+                        Background="#28a745" 
+                        Foreground="White"
+                        Padding="15,8"
+                        FontSize="13"/>
+                
+                <Button Content="🔄 Reset" 
+                        Command="{Binding ResetCommand}"
+                        Background="#6c757d" 
+                        Foreground="White"
+                        Padding="15,8"
+                        FontSize="13"/>
+            </StackPanel>
+
+            <TextBlock Grid.Column="1" 
+                       Text="{Binding TotalCount, StringFormat='Tổng số: {0} bản ghi'}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Right"
+                       FontSize="13"
+                       Foreground="#666"
+                       Margin="0,0,10,0"/>
+        </Grid>
+
+        <!-- Dòng 3: DataGrid -->
+        <Border Grid.Row="2" 
+                BorderBrush="#dee2e6" 
+                BorderThickness="1"
+                Background="White">
+            
+            <DataGrid ItemsSource="{Binding CardEvents}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      GridLinesVisibility="Horizontal"
+                      Background="White"
+                      CanUserReorderColumns="False"
+                      CanUserResizeColumns="True"
+                      CanUserSortColumns="False"
+                      HeadersVisibility="Column"
+                      SelectionMode="Single">
+                
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="STT" Width="50"/>
+                    <DataGridTextColumn Header="Số thẻ" Binding="{Binding CardNumber}" Width="120"/>
+                    <DataGridTextColumn Header="Biển số vào" Binding="{Binding PlateIn}" Width="120"/>
+                    <DataGridTextColumn Header="Thời gian vào" 
+                                        Binding="{Binding DatetimeIn, StringFormat='{}{0:dd/MM/yyyy HH:mm:ss}'}" 
+                                        Width="160"/>
+                    <DataGridTextColumn Header="Thời gian ra" 
+                                        Binding="{Binding DateTimeOut, StringFormat='{}{0:dd/MM/yyyy HH:mm:ss}'}" 
+                                        Width="160"/>
+                    <DataGridTextColumn Header="Tên khách hàng" Binding="{Binding CustomerName}" Width="180"/>
+                    <DataGridTextColumn Header="Số tiền" 
+                                        Binding="{Binding Moneys, StringFormat='{}{0:N0} VNĐ'}" 
+                                        Width="120"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,70 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <PlatformTarget>x64</PlatformTarget>
+
+	  <!-- 🔹 Thêm logo app (icon khi build .exe) -->
+	  <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+	  
+	  
+  </PropertyGroup>
+
+	
+	
+	
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+	  <AvaloniaResource Include="Assets\app.ico" />
+	  <!-- 🔹 Đảm bảo file icon được đưa vào resource -->
+    <Folder Include="Libs\" />
+    <Folder Include="Controller\" />
+    <Folder Include="Helpers\" />
+  </ItemGroup>
+	
+	
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.7" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.7" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.7" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.7" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.6" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.6" />
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.6">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+    <PackageReference Include="LibVLCSharp" Version="3.9.4" />
+    <PackageReference Include="LibVLCSharp.Avalonia" Version="3.9.4" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
+    <PackageReference Include="ReactiveUI" Version="22.1.1" />
+    <PackageReference Include="ReactiveUI.Avalonia" Version="11.3.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="iParkingv5.Controller">
+      <HintPath>D:\dll\iParkingv5.Controller.dll</HintPath>
+    </Reference>
+    <Reference Include="iParkingv5.Objects">
+      <HintPath>D:\dll\iParkingv5.Objects.dll</HintPath>
+    </Reference>
+    <Reference Include="Kztek.Object.Entity">
+      <HintPath>D:\dll\Kztek.Object.Entity.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+	<ItemGroup>
+		<None Update="Libs\**\*.*">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+</Project>

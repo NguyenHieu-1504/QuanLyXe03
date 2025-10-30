@@ -1,0 +1,28 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="QuanLyXe03.App"
+             xmlns:local="using:QuanLyXe03"
+             RequestedThemeVariant="Default">
+             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+  
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        <Style Selector="DataGrid">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        
+        <Style Selector="DataGridRow">
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+        
+        <Style Selector="DataGridCell">
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+    </Application.Styles>
+</Application>
