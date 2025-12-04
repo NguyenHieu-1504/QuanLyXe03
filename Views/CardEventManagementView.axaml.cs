@@ -1,6 +1,7 @@
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using QuanLyXe03.ViewModels;
+using System.Diagnostics;
 
 namespace QuanLyXe03.Views
 {
@@ -8,8 +9,19 @@ namespace QuanLyXe03.Views
     {
         public CardEventManagementView()
         {
-            AvaloniaXamlLoader.Load(this);
-            DataContext = new CardEventManagementViewModel();
+            Debug.WriteLine("🏗️ CardEventManagementView Constructor START");
+
+            //AvaloniaXamlLoader.Load(this);
+            InitializeComponent();
+
+            // CHỈ TẠO ViewModel 1 LẦN
+            if (DataContext == null)
+            {
+                Debug.WriteLine("   → Creating new ViewModel");
+                DataContext = new CardEventManagementViewModel();
+            }
+
+            Debug.WriteLine("🏗️ CardEventManagementView Constructor END");
         }
     }
 }

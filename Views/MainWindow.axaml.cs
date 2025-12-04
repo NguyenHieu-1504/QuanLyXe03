@@ -5,8 +5,10 @@ using QuanLyXe03.ViewModels;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace QuanLyXe03.Views
 {
@@ -21,8 +23,15 @@ namespace QuanLyXe03.Views
         public MainWindow()
         {
             InitializeComponent();
-            this.Icon = new WindowIcon("Assets/app.ico");   // Đặt biểu tượng cửa sổ
-            _vm = new MainWindowViewModel();
+
+            var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "app.ico");
+            if (File.Exists(iconPath))
+            {
+                this.Icon = new WindowIcon(iconPath);
+            }
+            // Nếu không có file → để trống → KHÔNG CRASH, Avalonia tự dùng icon mặc định
+            this.KeyDown += MainWindow_KeyDown;
+            _vm = new MainWindowViewModel(this);
             DataContext = _vm;
 
             Debug.WriteLine("========================================");
@@ -37,14 +46,40 @@ namespace QuanLyXe03.Views
                 return;
             }
 
-            // ✅ QUAN TRỌNG: Gán MediaPlayer SAU KHI UI loaded
+            //  Gán MediaPlayer SAU KHI UI loaded
             this.Loaded += MainWindow_Loaded;
             this.Opened += MainWindow_Opened;
 
             StartWindowHiderTimer();
         }
 
-        // ✅ THÊM: Xử lý click menu Danh sách thẻ
+        private void MainWindow_KeyDown(object? sender, Avalonia.Input.KeyEventArgs e)
+        {
+            if (e.Key != Avalonia.Input.Key.Space) return;
+            if (this.FocusManager?.GetFocusedElement() is TextBox) return;
+
+            var vm = DataContext as MainWindowViewModel;
+            if (vm == null) return;
+
+            if (!string.IsNullOrEmpty(vm.PlateNumberIn) && vm.PlateNumberIn != "---")
+                vm.ManualOpenInCommand.Execute(Unit.Default);
+            else if (!string.IsNullOrEmpty(vm.PlateNumberOut) && vm.PlateNumberOut != "---")
+                vm.ManualOpenOutCommand.Execute(Unit.Default);
+
+            e.Handled = true;
+        }
+        private void OpenSettings_Click(object? sender, RoutedEventArgs e)
+        {
+            var settingsWindow = new SettingsWindow
+            {
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+            settingsWindow.ShowDialog(this);
+        }
+
+
+
+        //  Xử lý click menu Danh sách thẻ
         private void OpenCardManagement_Click(object? sender, RoutedEventArgs e)
         {
             Debug.WriteLine("📋 Mở Danh sách thẻ...");
@@ -62,10 +97,7 @@ namespace QuanLyXe03.Views
             cardWindow.Show();
         }
 
-
-
-
-        // ✅ THÊM: Gán MediaPlayer khi UI đã sẵn sàng
+        //  Gán MediaPlayer khi UI đã sẵn sàng
         private void MainWindow_Loaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             Debug.WriteLine("🔧 MainWindow Loaded - Đang gán MediaPlayer...");
@@ -81,15 +113,11 @@ namespace QuanLyXe03.Views
                 {
                     try
                     {
-                        // Gán MediaPlayer vào VideoView
+                        // ===== GÁN CAMERA CHÍNH =====
                         if (CameraInView != null && _vm.MediaPlayerIn != null)
                         {
                             CameraInView.MediaPlayer = _vm.MediaPlayerIn;
                             Debug.WriteLine("✅ Đã gán MediaPlayerIn vào CameraInView");
-                        }
-                        else
-                        {
-                            Debug.WriteLine("❌ CameraInView hoặc MediaPlayerIn null");
                         }
 
                         if (CameraOutView != null && _vm.MediaPlayerOut != null)
@@ -97,6 +125,32 @@ namespace QuanLyXe03.Views
                             CameraOutView.MediaPlayer = _vm.MediaPlayerOut;
                             Debug.WriteLine("✅ Đã gán MediaPlayerOut vào CameraOutView");
                         }
+
+                        // ===== GÁN CAMERA PHỤ VÀO =====
+                        if (CameraInExtra1View != null && _vm.MediaPlayerInExtra1 != null)
+                        {
+                            CameraInExtra1View.MediaPlayer = _vm.MediaPlayerInExtra1;
+                            Debug.WriteLine("✅ Đã gán MediaPlayerInExtra1");
+                        }
+                        if (CameraInExtra2View != null && _vm.MediaPlayerInExtra2 != null)
+                        {
+                            CameraInExtra2View.MediaPlayer = _vm.MediaPlayerInExtra2;
+                            Debug.WriteLine("✅ Đã gán MediaPlayerInExtra2");
+                        }
+                        
+
+                        // ===== GÁN CAMERA PHỤ RA =====
+                        if (CameraOutExtra1View != null && _vm.MediaPlayerOutExtra1 != null)
+                        {
+                            CameraOutExtra1View.MediaPlayer = _vm.MediaPlayerOutExtra1;
+                            Debug.WriteLine("✅ Đã gán MediaPlayerOutExtra1");
+                        }
+                        if (CameraOutExtra2View != null && _vm.MediaPlayerOutExtra2 != null)
+                        {
+                            CameraOutExtra2View.MediaPlayer = _vm.MediaPlayerOutExtra2;
+                            Debug.WriteLine("✅ Đã gán MediaPlayerOutExtra2");
+                        }
+                        
                     }
                     catch (Exception ex)
                     {
@@ -106,8 +160,6 @@ namespace QuanLyXe03.Views
             });
         }
 
-
-        
         private void OpenCardEventManagement_Click(object? sender, RoutedEventArgs e)
         {
             Debug.WriteLine("📋 Mở Lịch sử xe ra vào...");
@@ -129,7 +181,6 @@ namespace QuanLyXe03.Views
         {
             Debug.WriteLine("========================================");
             Debug.WriteLine($"🪟 Window Opened Event");
-            //Debug.WriteLine($"   CardEvents.Count = {_vm?.CardEvents.Count ?? -1}");
 
             var grid = this.FindControl<DataGrid>("CardEventsGrid");
 
@@ -143,15 +194,6 @@ namespace QuanLyXe03.Views
                     var count = items.Cast<object>().Count();
                     Debug.WriteLine($"   Items Count = {count}");
                 }
-
-                //if (_vm != null)
-                //{
-                //    _vm.CardEvents.CollectionChanged += (s, args) =>
-                //    {
-                //        Debug.WriteLine($"🔔 CollectionChanged Event! Action: {args.Action}");
-                //        Debug.WriteLine($"   CardEvents.Count NOW: {_vm.CardEvents.Count}");
-                //    };
-                //}
             }
             else
             {
@@ -196,7 +238,7 @@ namespace QuanLyXe03.Views
         {
             Debug.WriteLine("🚪 Yêu cầu thoát ứng dụng...");
 
-            
+
             var msgBox = new Window
             {
                 Title = "Xác nhận thoát",
@@ -256,37 +298,61 @@ namespace QuanLyXe03.Views
 
             if (result)
             {
-                Debug.WriteLine("✅ Xác nhận thoát - Bắt đầu cleanup...");
+                Debug.WriteLine(" Xác nhận thoát - Bắt đầu cleanup...");
 
                 try
                 {
                     //  1. Dừng timer trước
                     windowHiderTimer?.Dispose();
                     windowHiderTimer = null;
-                    Debug.WriteLine("✅ Đã dispose timer");
+                    Debug.WriteLine(" Đã dispose timer");
 
-                    //  2. Stop MediaPlayers
+                    //  2. Stop MediaPlayers CHÍNH
                     if (_vm?.MediaPlayerIn != null && _vm.MediaPlayerIn.IsPlaying)
                     {
                         _vm.MediaPlayerIn.Stop();
-                        Debug.WriteLine("✅ Đã stop MediaPlayerIn");
+                        Debug.WriteLine(" Đã stop MediaPlayerIn");
                     }
 
                     if (_vm?.MediaPlayerOut != null && _vm.MediaPlayerOut.IsPlaying)
                     {
                         _vm.MediaPlayerOut.Stop();
-                        Debug.WriteLine("✅ Đã stop MediaPlayerOut");
+                        Debug.WriteLine(" Đã stop MediaPlayerOut");
                     }
 
-                    //  3. Đợi VLC cleanup
+                    //  3. Stop MediaPlayers PHỤ
+                    if (_vm?.MediaPlayerInExtra1 != null && _vm.MediaPlayerInExtra1.IsPlaying)
+                    {
+                        _vm.MediaPlayerInExtra1.Stop();
+                        Debug.WriteLine(" Đã stop MediaPlayerInExtra1");
+                    }
+                    if (_vm?.MediaPlayerInExtra2 != null && _vm.MediaPlayerInExtra2.IsPlaying)
+                    {
+                        _vm.MediaPlayerInExtra2.Stop();
+                        Debug.WriteLine(" Đã stop MediaPlayerInExtra2");
+                    }
+                    
+                    if (_vm?.MediaPlayerOutExtra1 != null && _vm.MediaPlayerOutExtra1.IsPlaying)
+                    {
+                        _vm.MediaPlayerOutExtra1.Stop();
+                        Debug.WriteLine(" Đã stop MediaPlayerOutExtra1");
+                    }
+                    if (_vm?.MediaPlayerOutExtra2 != null && _vm.MediaPlayerOutExtra2.IsPlaying)
+                    {
+                        _vm.MediaPlayerOutExtra2.Stop();
+                        Debug.WriteLine(" Đã stop MediaPlayerOutExtra2");
+                    }
+                    
+
+                    //  4. Đợi VLC cleanup
                     await Task.Delay(500);
 
-                    //  4. Dispose ViewModel
+                    //  5. Dispose ViewModel (sẽ dispose tất cả camera providers)
                     _vm?.Dispose();
                     _vm = null;
                     Debug.WriteLine("✅ Đã dispose ViewModel");
 
-                    //  5. Kill VLC processes còn sót
+                    //  6. Kill VLC processes còn sót
                     var vlcProcesses = System.Diagnostics.Process.GetProcessesByName("vlc");
                     foreach (var process in vlcProcesses)
                     {
@@ -302,10 +368,10 @@ namespace QuanLyXe03.Views
                     }
                     Debug.WriteLine("✅ Đã kill VLC processes");
 
-                    //  6. Đợi thêm chút
+                    //  7. Đợi thêm chút
                     await Task.Delay(200);
 
-                    //  7. Thoát ứng dụng
+                    //  8. Thoát ứng dụng
                     Debug.WriteLine("🚪 Đang thoát...");
 
                     var lifetime = Avalonia.Application.Current?.ApplicationLifetime
@@ -334,8 +400,6 @@ namespace QuanLyXe03.Views
             }
         }
 
-
-
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
@@ -359,6 +423,14 @@ namespace QuanLyXe03.Views
                 }
             }
             catch { }
+        }
+
+        private void TextBlock_ActualThemeVariantChanged(object? sender, EventArgs e)
+        {
+        }
+
+        private void TextBlock_ActualThemeVariantChanged_1(object? sender, EventArgs e)
+        {
         }
     }
 }

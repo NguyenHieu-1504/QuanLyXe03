@@ -6,28 +6,20 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	 
     <PlatformTarget>x64</PlatformTarget>
 
 	  <!-- 🔹 Thêm logo app (icon khi build .exe) -->
 	  <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-	  
-	  
   </PropertyGroup>
 
-	
-	
-	
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
 	  <AvaloniaResource Include="Assets\app.ico" />
 	  <!-- 🔹 Đảm bảo file icon được đưa vào resource -->
     <Folder Include="Libs\" />
-    <Folder Include="Controller\" />
-    <Folder Include="Helpers\" />
   </ItemGroup>
-	
-	
-
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.7" />
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.7" />
@@ -44,9 +36,14 @@
     <PackageReference Include="LibVLCSharp" Version="3.9.4" />
     <PackageReference Include="LibVLCSharp.Avalonia" Version="3.9.4" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
+    <PackageReference Include="OpenCvSharp4" Version="4.10.0.20240616" />
+    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.10.0.20240616" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.10.0.20240616" />
+    <PackageReference Include="OpenCvSharp4_.runtime.ubuntu.20.04-x64" Version="4.10.0.20240616" />
     <PackageReference Include="ReactiveUI" Version="22.1.1" />
     <PackageReference Include="ReactiveUI.Avalonia" Version="11.3.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
+    <PackageReference Include="Xabe.FFmpeg" Version="6.0.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,6 +61,17 @@
 	<ItemGroup>
 		<None Update="Libs\**\*.*">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="Assets\app.ico">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			
 		</None>
 	</ItemGroup>
 

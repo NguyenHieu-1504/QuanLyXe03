@@ -6,18 +6,13 @@
              mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="800"
              x:Class="QuanLyXe03.Views.CardManagementView"
              x:DataType="vm:CardManagementViewModel"
-             Background="Gray">
-
-    <Design.DataContext>
+             > <Design.DataContext>
         <vm:CardManagementViewModel/>
     </Design.DataContext>
 
     <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="15">
         
-        <!-- Dòng 1: Filters -->
         <Grid Grid.Row="0" ColumnDefinitions="2*,1*,1*,1.5*,1.5*" Margin="0,0,0,10">
-            
-            <!-- Từ khóa -->
             <StackPanel Grid.Column="0" Margin="0,0,10,0">
                 <TextBlock Text="Từ khóa:" FontSize="13" Margin="0,0,0,5"/>
                 <TextBox Text="{Binding SearchText}" 
@@ -25,19 +20,16 @@
                          Height="35"/>
             </StackPanel>
 
-            <!-- Từ ngày -->
             <StackPanel Grid.Column="1" Margin="0,0,10,0">
                 <TextBlock Text="Từ ngày:" FontSize="13" Margin="0,0,0,5"/>
                 <DatePicker SelectedDate="{Binding FromDate}" Height="35"/>
             </StackPanel>
 
-            <!-- Đến ngày -->
             <StackPanel Grid.Column="2" Margin="0,0,10,0">
                 <TextBlock Text="Đến ngày:" FontSize="13" Margin="0,0,0,5"/>
                 <DatePicker SelectedDate="{Binding ToDate}" Height="35"/>
             </StackPanel>
 
-            <!-- Nhóm khách hàng -->
             <StackPanel Grid.Column="3" Margin="0,0,10,0">
                 <TextBlock Text="Nhóm khách hàng:" FontSize="13" Margin="0,0,0,5"/>
                 <ComboBox Height="35" HorizontalAlignment="Stretch">
@@ -45,7 +37,6 @@
                 </ComboBox>
             </StackPanel>
 
-            <!-- Trạng thái -->
             <StackPanel Grid.Column="4">
                 <TextBlock Text="Trạng thái:" FontSize="13" Margin="0,0,0,5"/>
                 <ComboBox Height="35" HorizontalAlignment="Stretch">
@@ -58,13 +49,12 @@
             </StackPanel>
         </Grid>
 
-        <!-- Dòng 2: Radio buttons -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
             <RadioButton Content="Không lọc theo ngày" 
                          IsChecked="True" 
                          GroupName="DateFilter"
                          Margin="0,0,20,0"
-                         Command="{Binding $parent[UserControl].((vm:CardManagementViewModel)DataContext).ResetCommand}"/>
+                         Command="{Binding ResetCommand}"/>
             <RadioButton Content="Lọc theo ngày đăng ký" 
                          GroupName="DateFilter"
                          Margin="0,0,20,0"/>
@@ -72,40 +62,35 @@
                          GroupName="DateFilter"
                          Margin="0,0,20,0"/>
             
-            <!-- Nhóm thẻ -->
             <TextBlock Text="Nhóm thẻ:" VerticalAlignment="Center" Margin="20,0,10,0"/>
             <ComboBox Width="150">
                 <ComboBoxItem Content="None selected" IsSelected="True"/>
             </ComboBox>
         </StackPanel>
 
-        <!-- Dòng 3: Action buttons -->
         <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
             
-            <!-- Buttons bên trái -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
                 <Button Content="🔍 Tìm kiếm" 
-                        Command="{Binding SearchCommand}"
+                         Command="{Binding SearchCommand}"
                         Background="#007bff" 
                         Foreground="White"
                         Padding="15,8"
-                        FontSize="13"/>
-
+                         FontSize="13"/>
 
                 <Button Content="➕ Thêm mới" 
-                Click="AddCard_Click"
-                Background="#28a745" 
-                Foreground="White"
-                Padding="15,8"
-                FontSize="13"/>
-
-                
-                <Button Content="📄 Xuất excel" 
-                        Command="{Binding ExportExcelCommand}"
+                        Click="AddCard_Click"
                         Background="#28a745" 
                         Foreground="White"
                         Padding="15,8"
                         FontSize="13"/>
+                
+                <Button Content="📄 Xuất excel" 
+                         Command="{Binding ExportExcelCommand}"
+                        Background="#28a745" 
+                        Foreground="White"
+                        Padding="15,8"
+                         FontSize="13"/>
                 
                 <Button Content="📥 Nhập excel" 
                         Command="{Binding ImportExcelCommand}"
@@ -118,22 +103,48 @@
                         Command="{Binding ResetCommand}"
                         Background="#6c757d" 
                         Foreground="White"
-                        Padding="15,8"
+                         Padding="15,8"
                         FontSize="13"/>
             </StackPanel>
 
-            <!-- Thông tin số lượng -->
-            <TextBlock Grid.Column="1" 
-                       Text="{Binding TotalCount, StringFormat='Đã lựa chọn: 0 / {0}'}"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Center"
-                       FontSize="13"
-                       Foreground="#666"/>
+            <StackPanel Grid.Column="1" 
+                        Orientation="Horizontal"
+                         HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="10">
+                
+                <Button Content="&lt; Trước" 
+                        Command="{Binding PreviousPageCommand}"
+                        Background="#6c757d" 
+                        Foreground="White"
+                        Padding="12,8"
+                        FontSize="13"/>
 
-            <!-- Buttons bên phải -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="5">
+                    <TextBlock Text="Trang" Foreground="#333"/>
+                    <TextBlock Text="{Binding CurrentPage}" FontWeight="Bold" Foreground="#7da7d1"/>
+                    <TextBlock Text="/" Foreground="#666"/>
+                    <TextBlock Text="{Binding TotalPages}" FontWeight="Bold" Foreground="#333"/>
+                </StackPanel>
+                
+                <Button Content="Sau &gt;" 
+                        Command="{Binding NextPageCommand}"
+                        Background="#6c757d" 
+                        Foreground="White"
+                        Padding="12,8"
+                        FontSize="13"/>
+                        
+                <Border BorderBrush="#ccc" BorderThickness="1,0,0,0" Height="25" Margin="5,0"/>
+
+                <TextBlock Text="{Binding SelectedCount, StringFormat='Đã chọn: {0}'}"
+                           FontSize="13" Foreground="#666" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding TotalCount, StringFormat='Tổng: {0}'}"
+                           FontSize="13" Foreground="#666" VerticalAlignment="Center"/>
+            </StackPanel>
+
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
                 <Button Content="🔒 Khóa thẻ" 
-                        Background="#ffc107" 
+                         Background="#ffc107" 
                         Foreground="White"
                         Padding="12,8"
                         FontSize="13"/>
@@ -142,11 +153,12 @@
                         Background="#17a2b8" 
                         Foreground="White"
                         Padding="12,8"
-                        FontSize="13"/>
+                         FontSize="13"/>
                 
                 <Button Content="🗑️ Xóa thẻ" 
+                        Command="{Binding DeleteCardsCommand}"
                         Background="#dc3545" 
-                        Foreground="White"
+                         Foreground="White"
                         Padding="12,8"
                         FontSize="13"/>
                 
@@ -154,61 +166,112 @@
                         Background="#6c757d" 
                         Foreground="White"
                         Padding="12,8"
-                        FontSize="13"/>
+                         FontSize="13"/>
             </StackPanel>
         </Grid>
 
-        <!-- Dòng 4: DataGrid -->
-        <Border Grid.Row="3" BorderBrush="Red"
-                MinHeight="400"
-                Background="LightYellow"
-                BorderThickness="1">
+     <Border Grid.Row="3"
+        BorderBrush="#ddd"
+        BorderThickness="1"
+        CornerRadius="6"
+        Background="White"
+        BoxShadow="0 4 20 0 #20000000">
+
     <DataGrid ItemsSource="{Binding Cards}"
               AutoGenerateColumns="False"
               IsReadOnly="True"
-              GridLinesVisibility="All"
-              Background="LightBlue"
+              GridLinesVisibility="None"
               CanUserReorderColumns="False"
               CanUserResizeColumns="True"
-              CanUserSortColumns="False"
+              CanUserSortColumns="True"
               SelectionMode="Extended"
-              MaxHeight="500"
-              Height="500">
-        
+              HeadersVisibility="Column"
+              Background="White"
+              BorderThickness="0">
+
+        <!-- Toàn bộ hiệu ứng đẹp bằng Styles (hoạt động 100% từ Avalonia 11.0) -->
+        <DataGrid.Styles>
+            <!-- Header đẹp -->
+            <Style Selector="DataGridColumnHeader">
+                <Setter Property="Background" Value="#f5f5f5"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="#333"/>
+                <Setter Property="Padding" Value="12,10"/>
+                <Setter Property="Height" Value="44"/>
+                <Setter Property="BorderBrush" Value="#ddd"/>
+                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            </Style>
+
+            <!-- Dòng chẵn/lẻ xen kẽ + viền dưới + chiều cao -->
+            <Style Selector="DataGridRow">
+                <Setter Property="MinHeight" Value="44"/>
+                <Setter Property="BorderBrush" Value="#e8e8e8"/>
+                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                <Setter Property="Margin" Value="0,0,0,1"/>
+                <Setter Property="Background" Value="White"/>
+            </Style>
+
+            <!-- Dòng lẻ (alternating) – thay thế cho AlternatingRowBackground -->
+            <Style Selector="DataGridRow:nth-child(odd)">
+                <Setter Property="Background" Value="#fbfcfc"/>
+            </Style>
+
+            <!-- Hover -->
+            <Style Selector="DataGridRow:pointerover">
+                <Setter Property="Background" Value="#f0f7ff"/>
+            </Style>
+
+            <!-- Selected -->
+            <Style Selector="DataGridRow:selected">
+                <Setter Property="Background" Value="#e3f2fd"/>
+                <Setter Property="BorderBrush" Value="#2196F3"/>
+                <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            </Style>
+
+            <!-- Căn giữa nội dung ô (checkbox, STT…) -->
+            <Style Selector="DataGridCell">
+                <Setter Property="Padding" Value="8,0"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+            </Style>
+        </DataGrid.Styles>
+
+        <!-- Các cột giữ nguyên hoàn toàn -->
         <DataGrid.Columns>
-            <DataGridCheckBoxColumn Width="40">
-                <DataGridCheckBoxColumn.Header>
-                    <CheckBox/>
-                </DataGridCheckBoxColumn.Header>
-            </DataGridCheckBoxColumn>
-            
-            <DataGridTextColumn Header="STT" Width="50"/>
+            <DataGridTemplateColumn Header="Check" Width="50">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <CheckBox IsChecked="{Binding IsSelected}"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+
+            <DataGridTextColumn Header="STT" Binding="{Binding Index}" Width="50"/>
             <DataGridTextColumn Header="CardNo" Binding="{Binding CardNo}" Width="100"/>
             <DataGridTextColumn Header="Mã thẻ" Binding="{Binding CardNumber}" Width="120"/>
-            <DataGridTextColumn Header="Nhóm thẻ" Binding="{Binding CardGroupName}" Width="120"/>
+            <DataGridTextColumn Header="Nhóm thẻ" Binding="{Binding CardGroupName}" Width="100"/>
             <DataGridTextColumn Header="Biển số" Binding="{Binding Plate1}" Width="100"/>
-            <DataGridTextColumn Header="Ngày hết hạn" 
-                                Binding="{Binding ExpireDate, StringFormat='{}{0:dd/MM/yyyy}'}" 
-                                Width="110"/>
+            <DataGridTextColumn Header="Ngày hết hạn" Binding="{Binding DisplayExpireDate}" Width="110"/>
             <DataGridTextColumn Header="Mã KH" Binding="{Binding CustomerID}" Width="100"/>
-            <DataGridTextColumn Header="Khách hàng" Binding="{Binding CustomerName}" Width="150"/>
-            <DataGridTextColumn Header="Địa chỉ" Binding="{Binding Address}" Width="180"/>
+            <DataGridTextColumn Header="Khách hàng" Binding="{Binding CustomerName}" Width="*" MinWidth="130"/>
+            <DataGridTextColumn Header="Địa chỉ" Binding="{Binding Address}" Width="150"/>
             <DataGridTextColumn Header="Căn hộ" Binding="{Binding ApartmentNumber}" Width="80"/>
-            <DataGridTextColumn Header="Nhóm KH" Binding="{Binding CustomerGroupName}" Width="130"/>
-            <DataGridTextColumn Header="Ngày đăng ký" 
-                                Binding="{Binding DateRegister, StringFormat='{}{0:dd/MM/yyyy}'}" 
-                                Width="120"/>
+            <DataGridTextColumn Header="Nhóm KH" Binding="{Binding CustomerGroupName}" Width="100"/>
+            <DataGridTextColumn Header="Ngày đăng ký" Binding="{Binding DisplayDateRegister}" Width="120"/>
             <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusText}" Width="120"/>
-            
-            <!-- Xử lý -->
+
             <DataGridTemplateColumn Header="Xử lý" Width="180">
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
-                            <Button Content="✏️" Width="30" Height="30" Padding="0" Background="#ffc107"/>
-                            <Button Content="👁️" Width="30" Height="30" Padding="0" Background="#17a2b8"/>
-                            <Button Content="🔒" Width="30" Height="30" Padding="0" Background="#6c757d"/>
-                            <Button Content="🗑️" Width="30" Height="30" Padding="0" Background="#dc3545"/>
+                        <StackPanel Orientation="Horizontal" 
+                                    Spacing="5" 
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+                            <Button Content="Edit" Width="30" Height="30" Padding="0" Background="#ffc107" ToolTip.Tip="Sửa"/>
+                            <Button Content="View" Width="30" Height="30" Padding="0" Background="#17a2b8" ToolTip.Tip="Xem"/>
+                            <Button Content="Lock" Width="30" Height="30" Padding="0" Background="#6c757d" ToolTip.Tip="Khóa"/>
+                            <Button Content="Delete" Width="30" Height="30" Padding="0" Background="#dc3545" ToolTip.Tip="Xóa"/>
                         </StackPanel>
                     </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>

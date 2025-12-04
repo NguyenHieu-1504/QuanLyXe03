@@ -2,6 +2,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace QuanLyXe03.Services
 {
@@ -15,64 +17,109 @@ namespace QuanLyXe03.Services
         {
             try
             {
+                Console.WriteLine("========================================");
+                Console.WriteLine("🎬 Đang khởi tạo CameraService...");
+                Console.WriteLine($"   OS: {RuntimeInformation.OSDescription}");
+                Console.WriteLine($"   Platform: {GetPlatformName()}");
 
-
-                var vlcPath = Path.Combine(AppContext.BaseDirectory, "Libs");
-
-                // Kiểm tra thư mục VLC có tồn tại không
-                if (!Directory.Exists(vlcPath))
+                // LINUX: Không cần kiểm tra thư mục Libs
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    throw new DirectoryNotFoundException($"Không tìm thấy thư mục VLC tại: {vlcPath}");
+                    var vlcPath = Path.Combine(AppContext.BaseDirectory, "Libs");
+                    if (!Directory.Exists(vlcPath))
+                    {
+                        throw new DirectoryNotFoundException($"Không tìm thấy thư mục VLC tại: {vlcPath}");
+                    }
+                    Console.WriteLine($"   VLC Path: {vlcPath}");
                 }
-                var options = new string[]
-               {
-                    "--drawable-hwnd=0",         // Không tự tạo window
-                     "--vout=direct3d11",         // Video output qua Direct3D11
-                    "--intf=dummy",              // Không dùng interface
-                    "--no-video-title-show",     // Không hiển thị title
-                    "--no-osd",                  // Không hiển thị OSD
-                    "--quiet",                   // Chế độ im lặng
-                    "--no-spu",                  // Không subtitle
-                    "--no-audio",                // Không âm thanh
-                    "--aout=dummy",              // Audio output dummy
-                    "--no-video-deco",           // Không decoration
-                    "--no-embedded-video",       // Không embedded
-                  
-                    "--no-video-on-top",         // Không luôn ở trên
-                    "--no-video-wallpaper",      // Không dùng làm wallpaper
-                    "--no-disable-screensaver",  // Không disable screensaver
-                    "--no-one-instance",         // Cho phép nhiều instance
-                    "--no-playlist-enqueue",    // Không enqueue playlist
-                    "--no-video-title"
-               };
+                else
+                {
+                    Console.WriteLine("   VLC: Sử dụng system libvlc");
+                }
 
+                Console.WriteLine("   Đang gọi Core.Initialize()...");
+                Core.Initialize();
+                Console.WriteLine("   ✅ Core.Initialize() thành công");
+
+                var options = GetPlatformSpecificOptions();
+                Console.WriteLine($"   VLC Options: {string.Join(" ", options)}");
+
+                Console.WriteLine("   Đang tạo LibVLC instance...");
                 _libVLC = new LibVLC(options);
+                Console.WriteLine("   ✅ LibVLC instance tạo thành công");
+
                 IsInitialized = true;
-                Debug.WriteLine(" CameraService khởi tạo thành công");
+                Console.WriteLine("✅ CameraService khởi tạo thành công");
+                Console.WriteLine("========================================");
             }
             catch (Exception ex)
             {
                 IsInitialized = false;
                 InitializationError = ex.Message;
-                Debug.WriteLine($"❌ Lỗi khởi tạo CameraService: {ex.Message}");
-                Debug.WriteLine($"   Stack trace: {ex.StackTrace}");
+                Console.WriteLine($"❌ Lỗi khởi tạo CameraService: {ex.Message}");
+                Console.WriteLine($"   Stack trace: {ex.StackTrace}");
             }
         }
 
-        /// <summary>
-        /// Tạo MediaPlayer cho camera RTSP
-        /// </summary>
+        private string GetPlatformName()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return "Windows";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return "Linux";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "macOS";
+            return "Unknown";
+        }
+
+        private string[] GetPlatformSpecificOptions()
+        {
+            var options = new List<string>
+            {
+                "--intf=dummy",
+                "--no-osd",
+                "--no-audio",
+                "--aout=dummy",
+                "--verbose=2", // Bật log để debug
+                "--file-logging", // Ghi log ra file nếu cần
+                "--logfile=vlc-log.txt"
+            };
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                options.Add("--vout=direct3d11");
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                // Tăng buffer mạng cho Linux nhưng tối ưu low latency
+                options.Add("--network-caching=0"); // Giảm buffer như ffplay nobuffer
+                // Xóa --rtsp-tcp vì invalid global option
+                // options.Add("--rtsp-tcp"); // Đã xóa
+
+                // Xử lý X11
+                options.Add("--no-xlib");
+
+                // Tắt toàn bộ tăng tốc phần cứng trên Linux VM
+                options.Add("--avcodec-hw=none");
+
+                // Thêm low latency options
+                options.Add("--clock-jitter=0");
+                options.Add("--clock-synchro=0");
+            }
+
+            return options.ToArray();
+        }
+
         public MediaPlayer? CreatePlayer(string rtspUrl)
         {
+            Console.WriteLine($"🎥 CreatePlayer được gọi: {rtspUrl}");
+
             if (!IsInitialized)
             {
-                Debug.WriteLine($"❌ Không thể tạo player - CameraService chưa được khởi tạo: {InitializationError}");
+                Console.WriteLine($"❌ CameraService chưa khởi tạo: {InitializationError}");
                 return null;
             }
 
             if (_libVLC == null)
             {
-                Debug.WriteLine("❌ _libVLC is null");
+                Console.WriteLine("❌ _libVLC is null");
                 return null;
             }
 
@@ -80,158 +127,108 @@ namespace QuanLyXe03.Services
 
             try
             {
+                Console.WriteLine("   Đang tạo Media...");
                 var media = new Media(_libVLC, rtspUrl, FromType.FromLocation);
 
-                //  Cấu hình cho RTSP stream
-                media.AddOption("--network-caching=1000");
-                media.AddOption("--rtsp-tcp"); // Dùng TCP thay vì UDP cho ổn định hơn
-                media.AddOption("--no-video-title-show");
-                media.AddOption("--live-caching=300");
+                // Cấu hình RTSP - dùng ":" cho media options, tối ưu low latency như ffplay
+                media.AddOption(":network-caching=0"); // Nobuffer
+                media.AddOption(":live-caching=0");
+                media.AddOption(":rtsp-tcp"); // Force TCP
+                media.AddOption(":fflags=nobuffer");
+                media.AddOption(":flags=low_delay");
+                media.AddOption(":analyzeduration=100000");
+                media.AddOption(":probesize=100000");
+                media.AddOption(":max_delay=0");
 
+                Console.WriteLine("   Đang tạo MediaPlayer...");
                 player = new MediaPlayer(_libVLC)
                 {
                     EnableHardwareDecoding = false
                 };
 
-                // Đăng ký các event handlers để theo dõi trạng thái
-                player.Playing += (s, e) =>
-                {
-                    Debug.WriteLine($"▶️ Camera bắt đầu phát: {rtspUrl}");
-                };
-
-                player.Stopped += (s, e) =>
-                {
-                    Debug.WriteLine($"⏹️ Camera dừng: {rtspUrl}");
-                };
-
-                player.EncounteredError += (s, e) =>
-                {
-                    Debug.WriteLine($"❌ Lỗi phát camera: {rtspUrl}");
-                    Debug.WriteLine($"   Chi tiết: Không thể kết nối hoặc stream bị lỗi");
-                };
-
-                player.EndReached += (s, e) =>
-                {
-                    Debug.WriteLine($" Stream kết thúc: {rtspUrl}");
-                };
-
+                // Event handlers
+                player.Playing += (s, e) => Console.WriteLine($"▶️ Camera PLAYING: {rtspUrl}");
+                player.Stopped += (s, e) => Console.WriteLine($"⏹️ Camera STOPPED: {rtspUrl}");
+                player.EncounteredError += (s, e) => Console.WriteLine($"❌ Camera ERROR: {rtspUrl}");
                 player.Buffering += (s, e) =>
                 {
                     if (e.Cache < 100)
-                    {
-                        Debug.WriteLine($"⏳ Đang buffer: {e.Cache}%");
-                    }
+                        Console.WriteLine($"⏳ Buffering: {e.Cache}%");
                 };
 
-                // Bắt đầu phát
+                Console.WriteLine("   Đang gọi Play()...");
                 bool playResult = player.Play(media);
-
-                if (!playResult)
-                {
-                    Debug.WriteLine($" Không thể bắt đầu phát: {rtspUrl}");
-                }
+                Console.WriteLine($"   Play() returned: {playResult}");
 
                 return player;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"❌ Lỗi tạo MediaPlayer cho {rtspUrl}: {ex.Message}");
+                Console.WriteLine($"❌ Exception trong CreatePlayer: {ex.Message}");
+                Console.WriteLine($"   StackTrace: {ex.StackTrace}");
                 player?.Dispose();
                 return null;
             }
         }
 
-        /// <summary>
-        /// Chụp ảnh với callback để xử lý kết quả
-        /// </summary>
         public bool TakeSnapshot(MediaPlayer player, string filename, Action<bool, string>? onComplete = null)
         {
             if (player == null)
             {
-                string error = "MediaPlayer null - không thể chụp ảnh";
-                Debug.WriteLine($"❌ {error}");
-                onComplete?.Invoke(false, error);
+                Console.WriteLine("❌ MediaPlayer null");
+                onComplete?.Invoke(false, "MediaPlayer null");
                 return false;
             }
 
             if (!player.IsPlaying)
             {
-                string error = "Camera chưa phát - không thể chụp ảnh";
-                Debug.WriteLine($"⚠️ {error}");
-                onComplete?.Invoke(false, error);
+                Console.WriteLine("⚠️ Camera chưa phát");
+                onComplete?.Invoke(false, "Camera chưa phát");
                 return false;
             }
 
             try
             {
-                // Đảm bảo thư mục tồn tại
                 string? directory = Path.GetDirectoryName(filename);
                 if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
                 }
 
-                // Chụp ảnh (width=0, height=0 nghĩa là dùng kích thước gốc)
                 bool result = player.TakeSnapshot(0, filename, 0, 0);
 
                 if (result)
                 {
-                    // Đợi một chút để file được ghi xong
                     System.Threading.Thread.Sleep(500);
 
-                    // Kiểm tra file có tồn tại và có kích thước hợp lệ
                     if (File.Exists(filename))
                     {
                         var fileInfo = new FileInfo(filename);
                         if (fileInfo.Length > 0)
                         {
-                            Debug.WriteLine($"✅ Chụp ảnh thành công: {filename} ({fileInfo.Length} bytes)");
+                            Console.WriteLine($"✅ Snapshot: {filename} ({fileInfo.Length} bytes)");
                             onComplete?.Invoke(true, filename);
                             return true;
                         }
-                        else
-                        {
-                            string error = "File ảnh rỗng";
-                            Debug.WriteLine($"⚠️ {error}");
-                            onComplete?.Invoke(false, error);
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        string error = "File ảnh không được tạo";
-                        Debug.WriteLine($"⚠️ {error}");
-                        onComplete?.Invoke(false, error);
-                        return false;
                     }
                 }
-                else
-                {
-                    string error = "TakeSnapshot trả về false";
-                    Debug.WriteLine($"❌ {error}");
-                    onComplete?.Invoke(false, error);
-                    return false;
-                }
+
+                Console.WriteLine("❌ Snapshot thất bại");
+                onComplete?.Invoke(false, "Snapshot thất bại");
+                return false;
             }
             catch (Exception ex)
             {
-                string error = $"Exception khi chụp ảnh: {ex.Message}";
-                Debug.WriteLine($"❌ {error}");
-                Debug.WriteLine($"   Stack trace: {ex.StackTrace}");
-                onComplete?.Invoke(false, error);
+                Console.WriteLine($"❌ Exception: {ex.Message}");
+                onComplete?.Invoke(false, ex.Message);
                 return false;
             }
         }
 
-        /// <summary>
-        /// Kiểm tra MediaPlayer có sẵn sàng chụp ảnh không
-        /// </summary>
         public bool CanTakeSnapshot(MediaPlayer player)
         {
             if (player == null) return false;
             if (!player.IsPlaying) return false;
-
-            // Kiểm tra thêm: có video track không
             try
             {
                 return player.VideoTrack >= 0 || player.Media?.Tracks?.Length > 0;
@@ -244,15 +241,8 @@ namespace QuanLyXe03.Services
 
         public void Dispose()
         {
-            try
-            {
-                _libVLC?.Dispose();
-                Debug.WriteLine("✅ CameraService đã dispose");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"⚠️ Lỗi khi dispose CameraService: {ex.Message}");
-            }
+            _libVLC?.Dispose();
+            Console.WriteLine("✅ CameraService disposed");
         }
     }
 }

@@ -1,0 +1,120 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="QuanLyXe03.Views.SettingsWindow"
+        Title="Cài đặt hệ thống"
+        Width="650" Height="750"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent"
+        ExtendClientAreaToDecorationsHint="True">
+
+  <!-- NỀN GRADIENT -->
+  <Border CornerRadius="20" ClipToBounds="True">
+    <Border.Background>
+      <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Offset="0" Color="#1E3A8A"/>
+        <GradientStop Offset="1" Color="#0F172A"/>
+      </LinearGradientBrush>
+    </Border.Background>
+
+    <!-- SCROLLVIEWER CHO TOÀN BỘ NỘI DUNG -->
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <!-- NỘI DUNG -->
+      <Grid Margin="40,20" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+
+      <!-- ICON + TIÊU ĐỀ -->
+      <Image Grid.Row="0" Source="/Assets/app.ico" Width="70" Height="70" HorizontalAlignment="Center" Margin="0,0,0,15"/>
+      <TextBlock Grid.Row="1" Text="CÀI ĐẶT HỆ THỐNG" FontSize="26" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,30"/>
+
+      <!-- CHECKBOX -->
+      <Border Grid.Row="2" Background="#1E293B" CornerRadius="12" Padding="16" Margin="0,0,0,20">
+        <CheckBox x:Name="RequireLoginCheck" Content="Yêu cầu đăng nhập khi khởi động" Foreground="White" FontSize="15" FontWeight="Medium" IsChecked="True"/>
+      </Border>
+
+      <!-- NHÓM MẬT KHẨU -->
+      <StackPanel Grid.Row="3" Spacing="12" IsEnabled="{Binding ElementName=RequireLoginCheck, Path=IsChecked}">
+        <Border Background="#1E293B" CornerRadius="12" Padding="14">
+          <Grid ColumnDefinitions="Auto,*">
+            <TextBlock Grid.Column="0" Text="Lock" Foreground="#94A3B8" Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+            <TextBox Grid.Column="1" x:Name="CurrentPasswordBox" Watermark="Mật khẩu hiện tại" PasswordChar="*" Foreground="White" Background="Transparent" BorderThickness="0" FontSize="14"/>
+          </Grid>
+        </Border>
+        <Border Background="#1E293B" CornerRadius="12" Padding="14">
+          <Grid ColumnDefinitions="Auto,*">
+            <TextBlock Grid.Column="0" Text="Key" Foreground="#94A3B8" Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+            <TextBox Grid.Column="1" x:Name="NewPasswordBox" Watermark="Mật khẩu mới (để trống nếu không đổi)" PasswordChar="*" Foreground="White" Background="Transparent" BorderThickness="0" FontSize="14"/>
+          </Grid>
+        </Border>
+        <Border Background="#1E293B" CornerRadius="12" Padding="14">
+          <Grid ColumnDefinitions="Auto,*">
+            <TextBlock Grid.Column="0" Text="Check" Foreground="#94A3B8" Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+            <TextBox Grid.Column="1" x:Name="ConfirmPasswordBox" Watermark="Xác nhận mật khẩu" PasswordChar="*" Foreground="White" Background="Transparent" BorderThickness="0" FontSize="14"/>
+          </Grid>
+        </Border>
+      </StackPanel>
+
+      <!-- ĐƯỜNG DẪN LƯU ẢNH -->
+      <StackPanel Grid.Row="4" Spacing="15" Margin="0,20,0,10">
+        <TextBlock Text="ĐƯỜNG DẪN LƯU ẢNH" FontSize="16" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+        
+        <StackPanel Spacing="8">
+          <TextBlock Text="Ảnh XE VÀO (Input)" FontWeight="Bold" Foreground="#94A3B8"/>
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBox Grid.Column="0" x:Name="InputPathBox" IsReadOnly="True" Watermark="Chưa chọn thư mục..." Margin="0,0,8,0"/>
+            <Button Grid.Column="1" Content="Chọn" Click="ChooseInputFolder_Click" Background="#10B981" Foreground="White" CornerRadius="8"/>
+          </Grid>
+        </StackPanel>
+
+        <StackPanel Spacing="8">
+          <TextBlock Text="Ảnh XE RA (Output)" FontWeight="Bold" Foreground="#94A3B8"/>
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBox Grid.Column="0" x:Name="OutputPathBox" IsReadOnly="True" Watermark="Chưa chọn thư mục..." Margin="0,0,8,0"/>
+            <Button Grid.Column="1" Content="Chọn" Click="ChooseOutputFolder_Click" Background="#DC3545" Foreground="White" CornerRadius="8"/>
+          </Grid>
+        </StackPanel>
+      </StackPanel>
+
+      <!-- THÔNG BÁO -->
+      <TextBlock Grid.Row="5" x:Name="StatusText" Foreground="#10B981" FontSize="14" FontWeight="Medium" HorizontalAlignment="Center" Margin="0,15,0,25" TextWrapping="Wrap"/>
+
+      <!-- TAB CONTROL -->
+      <TabControl Grid.Row="6" Margin="0,0,0,20" Background="#1E293B" Foreground="White" CornerRadius="12" SelectedIndex="0" MinHeight="400">
+        <!-- TAB 1: BẢO MẬT -->
+        <TabItem Header="Bảo mật" FontWeight="SemiBold">
+          <Grid Height="120">
+            <TextBlock Text="Cấu hình bảo mật ở trên" Foreground="#94A3B8" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14"/>
+          </Grid>
+        </TabItem>
+
+        <!-- TAB 2: TEST KZ-E02 -->
+        <TabItem Header="Test KZ-E02" FontWeight="SemiBold">
+          <Border Background="#0F172A" CornerRadius="8" Margin="15">
+            <Grid RowDefinitions="Auto,*,Auto">
+              <WrapPanel Grid.Row="0" Margin="0,15,0,15" HorizontalAlignment="Center">
+                <Button Content="1. Ping" Click="TestPing_Click" Background="#17a2b8" Foreground="White" MinWidth="100" Padding="12,8" CornerRadius="8" Margin="4"/>
+                <Button Content="2. Firmware" Click="TestFirmware_Click" Background="#28a745" Foreground="White" MinWidth="100" Padding="12,8" CornerRadius="8" Margin="4"/>
+                <Button Content="3. Mode" Click="TestMode_Click" Background="#ffc107" Foreground="White" MinWidth="100" Padding="12,8" CornerRadius="8" Margin="4"/>
+                <Button Content="4. Mở Relay 1" Click="TestRelay_Click" Background="#dc3545" Foreground="White" MinWidth="100" Padding="12,8" CornerRadius="8" Margin="4"/>
+                <Button Content="Start Polling" Click="StartPolling_Click" Background="#6f42c1" Foreground="White" MinWidth="100" Padding="12,8" CornerRadius="8" Margin="4"/>
+                <Button Content="Stop Polling" Click="StopPolling_Click" Background="#6c757d" Foreground="White" MinWidth="100" Padding="12,8" CornerRadius="8" Margin="4"/>
+              </WrapPanel>
+              <Border Grid.Row="1" Background="#1E293B" CornerRadius="8" Padding="10" Margin="0,0,0,10" MinHeight="200">
+                <ScrollViewer>
+                  <TextBox x:Name="TestLogBox" IsReadOnly="True" FontFamily="Consolas" FontSize="12" Foreground="#10B981" Background="Transparent" BorderThickness="0" TextWrapping="Wrap" AcceptsReturn="True"/>
+                </ScrollViewer>
+              </Border>
+              <TextBlock Grid.Row="2" x:Name="TestStatusText" Text="Sẵn sàng" FontWeight="Bold" Foreground="#F59E0B" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+            </Grid>
+          </Border>
+        </TabItem>
+      </TabControl>
+
+      <!-- NÚT LƯU / HỦY -->
+      <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20" Margin="0,0,0,20">
+        <Button x:Name="SaveButton" Content="LƯU" Width="140" Height="48" FontSize="15" FontWeight="SemiBold" Background="#10B981" Foreground="White" CornerRadius="14" Click="Save_Click"/>
+        <Button x:Name="CancelButton" Content="HỦY" Width="140" Height="48" FontSize="15" FontWeight="SemiBold" Background="#64748B" Foreground="White" CornerRadius="14" Click="Cancel_Click"/>
+      </StackPanel>
+    </Grid>
+    </ScrollViewer>
+  </Border>
+</Window>

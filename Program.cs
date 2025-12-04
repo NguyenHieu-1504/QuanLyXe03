@@ -1,7 +1,8 @@
-﻿using System;
-using Avalonia;
-using System.IO;
+﻿using Avalonia;
 using LibVLCSharp.Shared;
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace QuanLyXe03
 {
@@ -14,13 +15,22 @@ namespace QuanLyXe03
         public static void Main(string[] args)
         {
 
-
             Console.WriteLine(" APP BẮT ĐẦU CHẠY!");
             Console.WriteLine("========================================");
 
-
-            var vlcPath = Path.Combine(AppContext.BaseDirectory, "Libs");
-            Core.Initialize(vlcPath);
+            // ============== FIX LINUX  ==============
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Chỉ Windows mới cần chỉ đường dẫn VLC thủ công
+                var vlcPath = Path.Combine(AppContext.BaseDirectory, "Libs");
+                Core.Initialize(vlcPath);
+            }
+            else
+            {
+                // Linux / macOS → KHÔNG truyền đường dẫn → để hệ thống tự tìm trong /usr/lib
+                Core.Initialize();
+            }
+            // =============================================
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
 

@@ -11,7 +11,7 @@
         MinHeight="550"
         WindowStartupLocation="CenterOwner"
         CanResize="True"
-        Background="Gray">
+        Background="LightGray">
 
     <Design.DataContext>
         <vm:AddCardViewModel/>
@@ -54,6 +54,19 @@
                              Watermark="Nhập mã thẻ"
                              Height="38"/>
                 </StackPanel>
+                <StackPanel>
+            <TextBlock Text="Biển số xe :" FontSize="13" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding Plate1}" 
+                     Watermark="VD: 51F-12345"
+                     Height="35"/>
+        </StackPanel>
+        
+        <StackPanel>
+            <TextBlock Text="Mã thẻ:" FontSize="13" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding CardNumber}" 
+                     Watermark="Nhập mã thẻ từ đầu đọc"
+                     Height="35"/>
+        </StackPanel>
 
                 <!-- CardGroup -->
                 <StackPanel>

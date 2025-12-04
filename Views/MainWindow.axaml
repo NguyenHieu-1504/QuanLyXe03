@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vlc="clr-namespace:LibVLCSharp.Avalonia;assembly=LibVLCSharp.Avalonia"
+        xmlns:local="clr-namespace:QuanLyXe03.Controls"
         mc:Ignorable="d"
         x:Class="QuanLyXe03.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -14,19 +15,14 @@
         WindowStartupLocation="CenterScreen"
         Background="#f8f9fa">
 
-    <Design.DataContext>
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
-
-
     <DockPanel>
         
-        <!-- ✅ Menu Bar -->
+        <!--  Menu Bar -->
         <Menu DockPanel.Dock="Top" Background="#2C3E50" Foreground="White">
             
             <!-- Menu Hệ thống -->
             <MenuItem Header="Hệ thống" Foreground="White">
-                <MenuItem Header="Cài đặt"/>
+                <MenuItem Header="Cài đặt" Click="OpenSettings_Click"/>
                 <MenuItem Header="Sao lưu dữ liệu"/>
                 <Separator/>
                 <MenuItem Header="Thoát" Click="Exit_Click"/>
@@ -35,161 +31,307 @@
             <!-- Menu Dữ liệu -->
             <MenuItem Header="Dữ liệu" Foreground="White">
                 <MenuItem Header="Danh sách thẻ" Click="OpenCardManagement_Click"/>
-                
                 <MenuItem Header="Lịch sử xe ra vào" Click="OpenCardEventManagement_Click"/>
                 <MenuItem Header="Danh sách khách hàng"/>
             </MenuItem>
             
         </Menu>
 
+        <!-- Grid chính -->
+        <Grid RowDefinitions="6*,4*" Background="#ECEFF1">
 
-
-    <!-- Grid chính -->
-    <Grid RowDefinitions="6*,4*" Background="#ECEFF1">  <!-- Điều chỉnh tỷ lệ rows -->
-
-        <!-- Hàng trên: Camera VÀO & RA -->
-        <Grid Grid.Row="0" ColumnDefinitions="1*,1*" Margin="6">
-            <!-- Camera Vào -->
-<Border Grid.Column="0" Background="#F0F0F0" Margin="5" CornerRadius="8"
-        BorderBrush="#2C3E50" BorderThickness="2">
-    <Grid RowDefinitions="Auto,*">
-        <Border Background="#2C3E50" Height="36" CornerRadius="8,8,0,0">
-            <TextBlock Text="🚗  VÀO"
-                       Foreground="White" FontSize="18" FontWeight="Bold"
-                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        </Border>
-
-        <!-- ✅ XÓA MediaPlayer binding, chỉ để x:Name -->
-        <vlc:VideoView Grid.Row="1"
-                       x:Name="CameraInView"
-                       HorizontalAlignment="Stretch"
-                       VerticalAlignment="Stretch"/>
-    </Grid>
-</Border>
-
-<!-- Camera Ra -->
-<Border Grid.Column="1" Background="#F0F0F0" Margin="5" CornerRadius="8"
-        BorderBrush="#2C3E50" BorderThickness="2">
-    <Grid RowDefinitions="Auto,*">
-        <Border Background="#2C3E50" Height="36" CornerRadius="8,8,0,0">
-            <TextBlock Text="🚙  RA"
-                       Foreground="White" FontSize="18" FontWeight="Bold"
-                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        </Border>
-
-        <!-- ✅ XÓA MediaPlayer binding, chỉ để x:Name -->
-        <vlc:VideoView Grid.Row="1"
-                       x:Name="CameraOutView"
-                       HorizontalAlignment="Stretch"
-                       VerticalAlignment="Stretch"/>
-    </Grid>
-</Border>
+            <!-- Hàng trên: Camera VÀO & RA -->
+            <!-- Hàng trên: Camera VÀO & RA với Grid 2x2 -->
+<!-- Hàng trên: Camera VÀO & RA -->
+<Grid Grid.Row="0" ColumnDefinitions="1*,1*" Margin="6">
+    
+    <!-- ========== CAMERA VÀO (Cột trái) ========== -->
+    <Border Grid.Column="0" Background="#F0F0F0" Margin="5" CornerRadius="8"
+            BorderBrush="#27AE60" BorderThickness="2">
+        <Grid RowDefinitions="Auto,*">
+            <!-- Header VÀO -->
+            <Border Background="#27AE60" Height="32" CornerRadius="8,8,0,0">
+                <TextBlock Text="🚗 VÀO" 
+                           Foreground="White" FontSize="16" FontWeight="Bold"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            
+            <!-- Layout: Camera chính TRÁI + 2 phụ PHẢI xếp dọc -->
+            <Grid Grid.Row="1" ColumnDefinitions="2*,1*" Margin="4">
+                
+                <!-- Camera CHÍNH VÀO (cột trái, to) -->
+                <Border Grid.Column="0" Background="Black" Margin="0,0,2,0" CornerRadius="4">
+                    <Grid>
+                        <vlc:VideoView x:Name="CameraInView"
+                                       IsVisible="{Binding !IsLinux}"/>
+                        <Image Source="{Binding FrameIn}"
+                               IsVisible="{Binding IsLinux}" 
+                               Stretch="UniformToFill"/>
+                    </Grid>
+                </Border>
+                
+                <!-- 2 Camera PHỤ VÀO xếp dọc (cột phải) -->
+                <Grid Grid.Column="1" RowDefinitions="1*,1*">
+                    <!-- Camera PHỤ VÀO 2 -->
+                    <Border Grid.Row="0" Background="Black" Margin="2,0,0,2" CornerRadius="4">
+                        <Grid>
+                            <vlc:VideoView x:Name="CameraInExtra1View"
+                                           IsVisible="{Binding !IsLinux}"/>
+                            <Image Source="{Binding FrameInExtra1}"
+                                   IsVisible="{Binding IsLinux}" 
+                                   Stretch="UniformToFill"/>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Camera PHỤ VÀO 3 -->
+                    <Border Grid.Row="1" Background="Black" Margin="2,2,0,0" CornerRadius="4">
+                        <Grid>
+                            <vlc:VideoView x:Name="CameraInExtra2View"
+                                           IsVisible="{Binding !IsLinux}"/>
+                            <Image Source="{Binding FrameInExtra2}"
+                                   IsVisible="{Binding IsLinux}" 
+                                   Stretch="UniformToFill"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
         </Grid>
-
-        <!-- Hàng giữa: thông tin + snapshot + các nút -->
-<Grid Grid.Row="1" ColumnDefinitions="1.5*,3*,1*" Margin="8">
-
-    <!-- Thông tin xe -->
-    <Border Grid.Column="0" Background="White" Margin="5" Padding="8"
-            CornerRadius="8" BorderBrush="#BDC3C7" BorderThickness="1">
-        <StackPanel>
-            <TextBlock Text="Thông tin xe" FontSize="14" FontWeight="Bold"
-                       Margin="0,0,0,8" HorizontalAlignment="Center"
-                       Foreground="Black"/>
-            
-            <!--  BIND Biển số -->
-            <TextBlock Text="{Binding PlateNumber, StringFormat='Biển số: {0}'}" 
-                       FontSize="12" Foreground="Black" Margin="0,0,0,4"/>
-            
-            <!--  BIND Thời gian -->
-            <TextBlock Text="{Binding VehicleDateTime, StringFormat='Thời gian: {0}'}" 
-                       FontSize="12" Foreground="Black" Margin="0,0,0,6"/>
-
-            <!--  Hiển thị StatusMessage -->
-        <TextBlock Text="{Binding StatusMessage}" 
-                   FontSize="13" 
-                   FontWeight="Bold"
-                   Foreground="Green" 
-                   Margin="0,8,0,4"
-                   TextWrapping="Wrap"
-                   HorizontalAlignment="Center"/>
-
-
-
-        </StackPanel>
     </Border>
 
-    <!-- Ảnh snapshot + nút -->
-    <Grid Grid.Column="1" Margin="5">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
-        <!--  3 Ảnh snapshot với binding -->
-        <Grid Grid.Row="0" ColumnDefinitions="1*,1*,1*" Margin="0">
-            <!-- Ảnh 1: Mới nhất -->
-            <Border Grid.Column="0" Background="White" BorderBrush="#BDC3C7"
-                    BorderThickness="1" CornerRadius="6" Margin="4" MinHeight="80">
-                <Image Source="{Binding Snapshot1}" Stretch="Uniform"/>
+    <!-- ========== CAMERA RA (Cột phải) ========== -->
+    <Border Grid.Column="1" Background="#F0F0F0" Margin="5" CornerRadius="8"
+            BorderBrush="#C0392B" BorderThickness="2">
+        <Grid RowDefinitions="Auto,*">
+            <!-- Header RA -->
+            <Border Background="#C0392B" Height="32" CornerRadius="8,8,0,0">
+                <TextBlock Text="🚗 RA" 
+                           Foreground="White" FontSize="16" FontWeight="Bold"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
-
-            <!-- Ảnh 2 -->
-            <Border Grid.Column="1" Background="White" BorderBrush="#BDC3C7"
-                    BorderThickness="1" CornerRadius="6" Margin="4" MinHeight="80">
-                <Image Source="{Binding Snapshot2}" Stretch="Uniform"/>
-            </Border>
-
-            <!-- Ảnh 3 -->
-            <Border Grid.Column="2" Background="White" BorderBrush="#BDC3C7"
-                    BorderThickness="1" CornerRadius="6" Margin="4" MinHeight="80">
-                <Image Source="{Binding Snapshot3}" Stretch="Uniform"/>
-            </Border>
-        </Grid>
-
-        <!-- Nút chức năng -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
-                    VerticalAlignment="Center" Margin="0,8,0,0" Spacing="12">
-            <Button Content="📸 Chụp lại"
-                    Command="{Binding CaptureSnapshotCommand}"
-                    Background="#7F8C8D" Foreground="White"
-                    MinWidth="100" MinHeight="40" Padding="8,4"
-                    FontSize="12"/>
-
-            <Button Content="✅ Ghi vào"
-                    Command="{Binding CheckInCommand}"
-                    Background="#27AE60" Foreground="White"
-                    MinWidth="100" MinHeight="40" Padding="8,4"
-                    FontSize="12"/>
-
-            <Button Content="⛔ Ghi ra"
-                    Command="{Binding CheckOutCommand}"
-                    Background="#C0392B" Foreground="White"
-                    MinWidth="100" MinHeight="40" Padding="8,4"
-                    FontSize="12"/>
-
-            <Button Content="🖨 In"
-                    Background="#7F8C8D" Foreground="White"
-                    MinWidth="100" MinHeight="40" Padding="8,4"
-                    FontSize="12"/>
-        </StackPanel>
-    </Grid>
-
-    <!-- Số tiền -->
-    <Border Grid.Column="2" Background="White" Margin="5" Padding="8"
-            CornerRadius="8" BorderBrush="#BDC3C7" BorderThickness="1">
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBlock Text="Số tiền" FontSize="14" FontWeight="Bold" 
-                       Margin="0,0,0,8" Foreground="Black"/>
             
-            <!--  BIND Số tiền -->
-            <TextBlock Text="{Binding ParkingFee}" 
-                       FontSize="24" FontWeight="Bold" Foreground="#C0392B"/>
-        </StackPanel>
+            <!-- Layout: 2 phụ TRÁI xếp dọc + Camera chính PHẢI -->
+            <Grid Grid.Row="1" ColumnDefinitions="1*,2*" Margin="4">
+                
+                <!-- 2 Camera PHỤ RA xếp dọc (cột trái) -->
+                <Grid Grid.Column="0" RowDefinitions="1*,1*">
+                    <!-- Camera PHỤ RA 2 -->
+                    <Border Grid.Row="0" Background="Black" Margin="0,0,2,2" CornerRadius="4">
+                        <Grid>
+                            <vlc:VideoView x:Name="CameraOutExtra1View"
+                                           IsVisible="{Binding !IsLinux}"/>
+                            <Image Source="{Binding FrameOutExtra1}"
+                                   IsVisible="{Binding IsLinux}" 
+                                   Stretch="UniformToFill"/>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Camera PHỤ RA 3 -->
+                    <Border Grid.Row="1" Background="Black" Margin="0,2,2,0" CornerRadius="4">
+                        <Grid>
+                            <vlc:VideoView x:Name="CameraOutExtra2View"
+                                           IsVisible="{Binding !IsLinux}"/>
+                            <Image Source="{Binding FrameOutExtra2}"
+                                   IsVisible="{Binding IsLinux}" 
+                                   Stretch="UniformToFill"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+                
+                <!-- Camera CHÍNH RA (cột phải, to) -->
+                <Border Grid.Column="1" Background="Black" Margin="2,0,0,0" CornerRadius="4">
+                    <Grid>
+                        <vlc:VideoView x:Name="CameraOutView"
+                                       IsVisible="{Binding !IsLinux}"/>
+                        <Image Source="{Binding FrameOut}"
+                               IsVisible="{Binding IsLinux}" 
+                               Stretch="UniformToFill"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
     </Border>
 </Grid>
 
-       
-    </Grid>
-        </DockPanel>
+            <!-- Hàng dưới: Thông tin + Snapshot + Nút mở cổng -->
+            <Grid Grid.Row="1" ColumnDefinitions="1.3*,3*,1.3*" Margin="8">
+
+                <!-- Thông tin xe VÀO -->
+                <Border Grid.Column="0" Background="White" Margin="5" Padding="10"
+                        CornerRadius="8" BorderBrush="#27AE60" BorderThickness="2">
+                    <StackPanel>
+                        <TextBlock Text="Thông tin xe VÀO" 
+                                   FontSize="14" 
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,10" 
+                                   HorizontalAlignment="Center"
+                                   Foreground="#27AE60"/>
+                        
+                        <TextBlock Text="{Binding PlateNumberIn, StringFormat='🚗 Biển số: {0}'}" 
+                                   FontSize="14" 
+                                FontWeight="Bold"
+                                Foreground="Black" 
+                                Margin="0,0,0,8"
+                                TextWrapping="Wrap"/>
+                        
+                        <TextBlock Text="{Binding VehicleDateTimeIn, StringFormat='🕐 Thời gian: {0}'}" 
+                                   FontSize="13" 
+                                   Foreground="Black" 
+                                   Margin="0,0,0,6"
+                                   TextWrapping="Wrap"/>
+                        
+
+
+
+                         <TextBlock Text="{Binding CardGroupIn, StringFormat='📇 Nhóm thẻ: {0}'}"
+                            FontSize="13" 
+                                   Foreground="Black" 
+                                   Margin="0,0,0,6"
+                                   TextWrapping="Wrap"/>
+
+
+                        <TextBlock Text="{Binding ExpireDateIn, StringFormat='📅 Hết hạn: {0}'}"
+                            FontSize="13" 
+                                   Foreground="Black" 
+                                   Margin="0,0,0,6"
+                                   TextWrapping="Wrap"/>
+                        
+                        <TextBlock Text="{Binding StatusMessageIn}" 
+                                   FontSize="13" 
+                                   FontWeight="Bold"
+                                   Foreground="#27AE60" 
+                                   Margin="0,8,0,0"
+                                   TextWrapping="Wrap"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Ảnh snapshot + Nút chức năng + Nút mở cổng -->
+                <Border Grid.Column="1" Margin="5" Background="Transparent">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- 3 Ảnh snapshot -->
+                        <Grid Grid.Row="0" ColumnDefinitions="1*,1*,1*" Margin="0">
+                            <Border Grid.Column="0" Background="White" BorderBrush="#BDC3C7"
+                                    BorderThickness="1" CornerRadius="6" Margin="4" MinHeight="80">
+                                <Image Source="{Binding Snapshot1}" Stretch="Uniform"/>
+                            </Border>
+                            <Border Grid.Column="1" Background="White" BorderBrush="#BDC3C7"
+                                    BorderThickness="1" CornerRadius="6" Margin="4" MinHeight="80">
+                                <Image Source="{Binding Snapshot2}" Stretch="Uniform"/>
+                            </Border>
+                            <Border Grid.Column="2" Background="White" BorderBrush="#BDC3C7"
+                                    BorderThickness="1" CornerRadius="6" Margin="4" MinHeight="80">
+                                <Image Source="{Binding Snapshot3}" Stretch="Uniform"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Nút chức năng (chụp, ghi vào/ra, in) -->
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" Margin="0,8,0,8" Spacing="12">
+                            <Button Content="Chụp lại"
+                                    Command="{Binding CaptureSnapshotCommand}"
+                                    Background="#7F8C8D" Foreground="White"
+                                    MinWidth="100" MinHeight="40" Padding="8,4"
+                                    FontSize="12"/>
+                            <Button Content="Ghi vào"
+                                    Command="{Binding CheckInCommand}"
+                                    Background="#27AE60" Foreground="White"
+                                    MinWidth="100" MinHeight="40" Padding="8,4"
+                                    FontSize="12"/>
+                            <Button Content="Ghi ra"
+                                    Command="{Binding CheckOutCommand}"
+                                    Background="#C0392B" Foreground="White"
+                                    MinWidth="100" MinHeight="40" Padding="8,4"
+                                    FontSize="12"/>
+                            <Button Content="In"
+                                    Background="#7F8C8D" Foreground="White"
+                                    MinWidth="100" MinHeight="40" Padding="8,4"
+                                    FontSize="12"/>
+                        </StackPanel>
+
+                        <!-- NÚT MỞ CỔNG (Space) -->
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" Spacing="15" Margin="0,0,0,10">
+                            <Button Content="MỞ CỔNG VÀO (Space)"
+                                    Command="{Binding ManualOpenInCommand}"
+                                    Background="#27ae60" Foreground="White" FontWeight="Bold"
+                                    CornerRadius="8" Padding="15,10" MinWidth="160"/>
+                            <Button Content="MỞ CỔNG RA (Space)"
+                                    Command="{Binding ManualOpenOutCommand}"
+                                    Background="#e74c3c" Foreground="White" FontWeight="Bold"
+                                    CornerRadius="8" Padding="15,10" MinWidth="160"/>
+                        </StackPanel>
+
+                        <!-- Hiển thị lần mở tay cuối -->
+                        <TextBlock Grid.Row="2" Text="{Binding LastManualOpen}"
+                                   FontStyle="Italic" Foreground="#666"
+                                   HorizontalAlignment="Center" Margin="0,50,0,0"
+                                   FontSize="12"/>
+                    </Grid>
+                </Border>
+
+                
+               <!-- Thông tin xe RA -->
+         <Border Grid.Column="2" Background="White" Margin="5" Padding="10"
+                CornerRadius="8" BorderBrush="#C0392B" BorderThickness="2">
+            <StackPanel>
+                <TextBlock Text="Thông tin xe RA" 
+                           FontSize="14" 
+                           FontWeight="Bold"
+                           Margin="0,0,0,10" 
+                           HorizontalAlignment="Center"
+                           Foreground="#C0392B"/>
+        
+        
+                <TextBlock Text="{Binding PlateNumberOut, StringFormat='🚗 Biển số: {0}'}" 
+                           FontSize="14" 
+                           FontWeight="Bold"
+                           Foreground="Black" 
+                           Margin="0,0,0,8"
+                           TextWrapping="Wrap"/>
+
+                 <TextBlock Text="{Binding VehicleDateTimeOut, StringFormat='🕐 Thời gian: {0}'}" 
+                           FontSize="13" 
+                           Foreground="Black" 
+                           Margin="0,0,0,6"
+                           TextWrapping="Wrap"/>
+        
+                <TextBlock Text="{Binding CardGroupOut, StringFormat='📇 Nhóm thẻ: {0}'}"
+                           FontSize="13" 
+                           Foreground="Black" 
+                           Margin="0,0,0,6"
+                           TextWrapping="Wrap"/>
+
+                <TextBlock Text="{Binding ExpireDateOut, StringFormat='📅 Hết hạn: {0}'}"
+                           FontSize="13" 
+                           Foreground="Black" 
+                           Margin="0,0,0,6"
+                           TextWrapping="Wrap"/>
+        
+                <Separator Height="1" Background="#ddd" Margin="0,8,0,8"/>
+        
+                <TextBlock Text="{Binding ParkingFeeOut, StringFormat='💰 Phí đỗ: {0}'}" 
+                           FontSize="16" 
+                           FontWeight="Bold"
+                           Foreground="#C0392B" 
+                           Margin="0,0,0,6"
+                           HorizontalAlignment="Center"/>
+        
+                <TextBlock Text="{Binding StatusMessageOut}" 
+                           FontSize="13" 
+                           FontWeight="Bold"
+                           Foreground="#C0392B" 
+                           Margin="0,4,0,0"
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </DockPanel>
 </Window>

@@ -1,0 +1,107 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="QuanLyXe03.Views.LoginWindow"
+        Title="Đăng nhập"
+        Width="460" Height="560"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1">
+
+  <!-- NỀN GRADIENT -->
+  <Border CornerRadius="20" ClipToBounds="True">
+    <Border.Background>
+      <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Offset="0" Color="#6DD5FA"/>
+        <GradientStop Offset="1" Color="#2980B9"/>
+      </LinearGradientBrush>
+    </Border.Background>
+
+    <!-- NỘI DUNG -->
+    <Grid Margin="40" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*">
+      
+      <!-- LOGO -->
+      <Image Grid.Row="0"
+             Source="/Assets/app.ico"
+             Width="80" Height="80"
+             HorizontalAlignment="Center"
+             Margin="0,0,0,20"/>
+
+      <!-- TIÊU ĐỀ -->
+      <TextBlock Grid.Row="1"
+                 Text="QUẢN LÝ XE"
+                 FontSize="28"
+                 FontWeight="Bold"
+                 Foreground="White"
+                 HorizontalAlignment="Center"
+                 Margin="0,0,0,30"
+                 TextAlignment="Center">
+        <TextBlock.Effect>
+          <DropShadowEffect Color="Black" Opacity="0.4" BlurRadius="8" OffsetX="2" OffsetY="2"/>
+        </TextBlock.Effect>
+      </TextBlock>
+
+      <!-- Ô MẬT KHẨU -->
+      <Border Grid.Row="2"
+              Background="White"
+              CornerRadius="12"
+              Padding="15"
+              Margin="0,0,0,20"
+              x:Name="PasswordBorder">
+        <TextBox x:Name="PasswordBox"
+                 Watermark="Nhập mật khẩu..."
+                 PasswordChar="*"
+                 FontSize="16"
+                 Foreground="LightGray"
+                 BorderThickness="0"
+                 Background="#2A2A2A"/>
+      </Border>
+
+      <!-- THÔNG BÁO LỖI -->
+      <TextBlock Grid.Row="3"
+                 x:Name="ErrorMessage"
+                 Foreground="#E74C3C"
+                 FontSize="13"
+                 FontWeight="SemiBold"
+                 HorizontalAlignment="Center"
+                 Margin="0,0,0,20"
+                 TextWrapping="Wrap"
+                 TextAlignment="Center"/>
+
+      <!-- NÚT -->
+      <StackPanel Grid.Row="4"
+            Orientation="Horizontal"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Spacing="20">
+
+    <Button x:Name="LoginButton"
+            Content="ĐĂNG NHẬP"
+            Width="150" Height="50"
+            FontSize="16" FontWeight="SemiBold"
+            Background="#27AE60"
+            Foreground="White"
+            CornerRadius="14"
+            Click="Login_Click"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            HorizontalContentAlignment="Center"
+            VerticalContentAlignment="Center"/>
+
+    <Button x:Name="ExitButton"
+            Content="THOÁT"
+            Width="150" Height="50"
+            FontSize="16" FontWeight="SemiBold"
+            Background="#C0392B"
+            Foreground="White"
+            CornerRadius="14"
+            Click="Exit_Click"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            HorizontalContentAlignment="Center"
+            VerticalContentAlignment="Center"/>
+</StackPanel>
+    </Grid>
+  </Border>
+</Window>

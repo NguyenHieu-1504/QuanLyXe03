@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using QuanLyXe03.Models;
+using QuanLyXe03.Services;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Data.SqlClient;
-
-using QuanLyXe03.Models;
 
 namespace QuanLyXe03.Repositories
 {
@@ -13,8 +13,9 @@ namespace QuanLyXe03.Repositories
 
         public CardEventRepository()
         {
-            
-            _connectionString = "Server=LAPTOP-KI4FNUQ7;Database=MPARKINGEVENTTM;User Id=sa;Password=123;TrustServerCertificate=True;";
+
+            _connectionString = SettingsManager.GetConnectionString("ParkingEventDb");
+            Debug.WriteLine($"🔗 CardEventRepository: Using connection string from config");
         }
 
         public List<CardEventModel> GetAll()
@@ -23,7 +24,7 @@ namespace QuanLyXe03.Repositories
 
             try
             {
-                Debug.WriteLine("🔌 Đang kết nối database...");
+                Debug.WriteLine(" Đang kết nối database...");
 
                 using (var conn = new SqlConnection(_connectionString))
                 {
@@ -54,7 +55,7 @@ namespace QuanLyXe03.Repositories
                         count++;
                     }
 
-                    Debug.WriteLine($"📦 Đã đọc {count} bản ghi từ database");
+                    Debug.WriteLine($" Đã đọc {count} bản ghi từ database");
                 }
             }
             catch (Exception ex)
@@ -65,11 +66,122 @@ namespace QuanLyXe03.Repositories
             return list;
         }
 
+        /// <summary>
+        /// Lấy danh sách sự kiện ra vào thẻ CÓ PHÂN TRANG
+        /// </summary>
+        public CardEventPageModel GetCardEvents(string searchText = "", DateTime? fromDate = null, DateTime? toDate = null, int pageNumber = 1, int pageSize = 15)
+        {
+            var result = new CardEventPageModel();
+            var list = new List<CardEventModel>();
+            int totalCount = 0;
 
-            /// <summary>
-            /// Thêm bản ghi xe vào (Ghi vào)
-            /// </summary>
-public Guid? InsertCardEventIn(string plateIn, DateTime datetimeIn)
+            // Tính toán Offset cho SQL
+            int offset = (pageNumber - 1) * pageSize;
+            Debug.WriteLine($"📂 Repository: GetCardEvents (Page {pageNumber}) - Connecting DB...");
+
+            try
+            {
+                using (var conn = new SqlConnection(_connectionString))
+                {
+                    conn.Open();
+                    Debug.WriteLine("📂 Repository: Connected!");
+
+                    // --- TRUY VẤN 1: LẤY TỔNG SỐ BẢN GHI (ĐỂ TÍNH SỐ TRANG) ---
+                    var countQuery = @"SELECT COUNT(*) FROM tblCardEvent WHERE 1=1 ";
+
+                    // Thêm điều kiện lọc cho query COUNT
+                    if (!string.IsNullOrWhiteSpace(searchText))
+                    {
+                        countQuery += " AND (CardNumber LIKE @SearchText OR PlateIn LIKE @SearchText OR CustomerName LIKE @SearchText) ";
+                    }
+                    if (fromDate.HasValue)
+                    {
+                        countQuery += " AND DatetimeIn >= @FromDate ";
+                    }
+                    if (toDate.HasValue)
+                    {
+                        countQuery += " AND DatetimeIn < @ToDate ";
+                    }
+
+                    var countCmd = new SqlCommand(countQuery, conn);
+                    // Thêm Parameters cho query COUNT
+                    if (!string.IsNullOrWhiteSpace(searchText)) countCmd.Parameters.AddWithValue("@SearchText", $"%{searchText.Trim()}%");
+                    if (fromDate.HasValue) countCmd.Parameters.AddWithValue("@FromDate", fromDate.Value.Date);
+                    if (toDate.HasValue) countCmd.Parameters.AddWithValue("@ToDate", toDate.Value.Date.AddDays(1));
+
+                    // Thực thi
+                    totalCount = (int)countCmd.ExecuteScalar();
+
+
+                    // --- TRUY VẤN 2: LẤY DỮ LIỆU CỦA TRANG HIỆN TẠI (15 BẢN GHI) ---
+                    var query = @"
+                        SELECT Id, CardNumber, PlateIn, DatetimeIn, DateTimeOut, CustomerName, Moneys 
+                        FROM tblCardEvent 
+                        WHERE 1=1 ";
+
+                    // Thêm điều kiện lọc cho query DATA
+                    if (!string.IsNullOrWhiteSpace(searchText))
+                    {
+                        query += " AND (CardNumber LIKE @SearchText OR PlateIn LIKE @SearchText OR CustomerName LIKE @SearchText) ";
+                    }
+                    if (fromDate.HasValue)
+                    {
+                        query += " AND DatetimeIn >= @FromDate ";
+                    }
+                    if (toDate.HasValue)
+                    {
+                        query += " AND DatetimeIn < @ToDate ";
+                    }
+
+                    // Thêm logic Sắp xếp và Phân trang
+                    query += @" ORDER BY DatetimeIn DESC
+                               OFFSET @Offset ROWS 
+                               FETCH NEXT @PageSize ROWS ONLY";
+
+                    var cmd = new SqlCommand(query, conn);
+
+                    // Thêm Parameters cho query DATA
+                    if (!string.IsNullOrWhiteSpace(searchText)) cmd.Parameters.AddWithValue("@SearchText", $"%{searchText.Trim()}%");
+                    if (fromDate.HasValue) cmd.Parameters.AddWithValue("@FromDate", fromDate.Value.Date);
+                    if (toDate.HasValue) cmd.Parameters.AddWithValue("@ToDate", toDate.Value.Date.AddDays(1));
+
+                    cmd.Parameters.AddWithValue("@Offset", offset);
+                
+                    cmd.Parameters.AddWithValue("@PageSize", pageSize);
+
+                    var reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        var item = new CardEventModel
+                        {
+                            Id = reader.GetGuid(0),
+                            CardNumber = reader["CardNumber"]?.ToString() ?? "",
+                            PlateIn = reader["PlateIn"]?.ToString() ?? "",
+                            DatetimeIn = reader["DatetimeIn"] as DateTime?,
+                            DateTimeOut = reader["DateTimeOut"] as DateTime?,
+                            CustomerName = reader["CustomerName"]?.ToString() ?? "",
+                            Moneys = reader["Moneys"] != DBNull.Value ? Convert.ToDecimal(reader["Moneys"]) : 0
+                        };
+                        list.Add(item);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"❌ Lỗi GetCardEvents (Pagination): {ex.Message}");
+            }
+
+            result.Events = list;
+            result.TotalCount = totalCount;
+            return result;
+        }
+
+
+        /// <summary>
+        /// Thêm bản ghi xe vào (Ghi vào)
+        /// </summary>
+        public Guid? InsertCardEventIn(string plateIn, DateTime datetimeIn, string cardNumber)
         {
             try
             {
@@ -79,34 +191,32 @@ public Guid? InsertCardEventIn(string plateIn, DateTime datetimeIn)
                 {
                     conn.Open();
 
-                    var query = @"
-                INSERT INTO tblCardEvent (
-                    Id, CardNumber, PlateIn, DatetimeIn, DateTimeOut, CustomerName, Moneys
-                )
-                VALUES (
-                    @Id, '', @PlateIn, @DatetimeIn, NULL, '', 0
-                )";
-
-                    var cmd = new SqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@Id", newId);
-                    cmd.Parameters.AddWithValue("@PlateIn", plateIn);
-                    cmd.Parameters.AddWithValue("@DatetimeIn", datetimeIn);
-
-                    int result = cmd.ExecuteNonQuery();
-
-                    if (result > 0)
+                    //  SỬ DỤNG TRANSACTION VỚI ISOLATION LEVEL THẤP
+                    using (var transaction = conn.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
                     {
-                        Debug.WriteLine($"✅ Đã thêm xe vào: {plateIn} lúc {datetimeIn:HH:mm:ss}");
-                        return newId;
+                                        var query = @"
+                    INSERT INTO tblCardEvent
+                    (Id, CardNumber, PlateIn, DatetimeIn, DateTimeOut, CustomerName, Moneys)
+                    VALUES (@Id, @CardNumber, @PlateIn, @DatetimeIn, NULL, '', 0)";
+
+                        var cmd = new SqlCommand(query, conn, transaction);
+                        cmd.Parameters.AddWithValue("@Id", newId);
+                        cmd.Parameters.AddWithValue("@CardNumber", cardNumber ?? "");
+                        cmd.Parameters.AddWithValue("@PlateIn", plateIn);
+                        cmd.Parameters.AddWithValue("@DatetimeIn", datetimeIn);
+
+                        int result = cmd.ExecuteNonQuery();
+                        transaction.Commit();  // ← Commit ngay
+
+                        return result > 0 ? newId : null;
                     }
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"❌ Lỗi InsertCardEventIn: {ex.Message}");
+                return null;
             }
-
-            return null;
         }
 
         /// <summary>
@@ -145,7 +255,7 @@ public Guid? InsertCardEventIn(string plateIn, DateTime datetimeIn)
                             Moneys = reader["Moneys"] != DBNull.Value ? Convert.ToDecimal(reader["Moneys"]) : 0
                         };
 
-                        Debug.WriteLine($"✅ Tìm thấy xe: {plateIn} vào lúc {cardEvent.DatetimeIn:HH:mm:ss}");
+                        Debug.WriteLine($" Tìm thấy xe: {plateIn} vào lúc {cardEvent.DatetimeIn:HH:mm:ss}");
                         return cardEvent;
                     }
                 }
@@ -197,9 +307,6 @@ public Guid? InsertCardEventIn(string plateIn, DateTime datetimeIn)
 
             return false;
         }
-
-
-
     }
     }
 
